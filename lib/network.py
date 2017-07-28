@@ -720,6 +720,12 @@ class Network(util.DaemonThread):
 
     def on_get_chunk(self, interface, response):
         '''Handle receiving a chunk of block headers'''
+	result = response.get('result')
+	params = response.get('params')
+	if result is None or params is None:
+		interface.print_error( 'bad response')
+		return
+
         if self.bc_requests:
             req_if, data = self.bc_requests[0]
             req_idx = data.get('chunk_idx')
