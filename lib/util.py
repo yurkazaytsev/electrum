@@ -214,7 +214,7 @@ def android_data_dir():
     return PythonActivity.mActivity.getFilesDir().getPath() + '/data'
 
 def android_headers_path():
-    path = android_ext_dir() + '/org.electrum.electrum/blockchain_headers'
+    path = android_ext_dir() + '/org.electon.electron/blockchain_headers'
     d = os.path.dirname(path)
     if not os.path.exists(d):
         os.mkdir(d)
