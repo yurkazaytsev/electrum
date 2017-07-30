@@ -195,6 +195,11 @@ class Blockchain(util.PrintError):
                 self.local_height = h
 
     def read_header(self, block_height):
+	if self.cur_chunk and (block_height // 2016) == self.cur_chunk_index:
+		n = height % 2016
+		h = self.cur_chunk[n * 80: (n + 1) * 80]
+		h = self.deserialize_header(h)
+		return h
         name = self.path()
         if os.path.exists(name):
             f = open(name, 'rb')
