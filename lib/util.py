@@ -349,7 +349,7 @@ def time_difference(distance_in_time, include_seconds):
 
 block_explorer_info = {
   
-                        {'tx': 'tx/info', 'addr': 'address/info'}),
+                       
     'Blocktrail.com': ('https://www.blocktrail.com/BCC',
                         {'tx': 'tx', 'addr': 'address'}),
   
