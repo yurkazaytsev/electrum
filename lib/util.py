@@ -214,7 +214,7 @@ def android_data_dir():
     return PythonActivity.mActivity.getFilesDir().getPath() + '/data'
 
 def android_headers_path():
-    path = android_ext_dir() + '/org.electon.electron/blockchain_headers'
+    path = android_ext_dir() + '/org.electron.electron/blockchain_headers'
     d = os.path.dirname(path)
     if not os.path.exists(d):
         os.mkdir(d)
@@ -350,15 +350,15 @@ def time_difference(distance_in_time, include_seconds):
 block_explorer_info = {
   
                        
-    'Blocktrail.com': ('https://www.blocktrail.com/BCC',
-                        {'tx': 'tx', 'addr': 'address'}),
+    'Blockchair.com': ('https://blockchair.com/bitcoin-cash',
+                        {'tx': 'transaction', 'addr': 'address'}),
   
     'system default': ('blockchain:',
                         {'tx': 'tx', 'addr': 'address'}),
 }
 
 def block_explorer(config):
-    return config.get('block_explorer', 'Blockchain.info')
+    return config.get('block_explorer', 'Blockchair.com')
 
 def block_explorer_tuple(config):
     return block_explorer_info.get(block_explorer(config))
