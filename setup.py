@@ -62,6 +62,7 @@ setup(
         'electroncash_plugins.trezor',
         'electroncash_plugins.digitalbitbox',
         'electroncash_plugins.virtualkeyboard',
+        'electroncash_plugins.hello_world',
     ],
     package_dir={
         'electroncash': 'lib',
