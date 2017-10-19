@@ -138,6 +138,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.receive_tab = self.create_receive_tab()
         self.addresses_tab = self.create_addresses_tab()
         self.utxo_tab = self.create_utxo_tab()
+        self.shuffle_tab = self.create_shuffle_tab()
         self.console_tab = self.create_console_tab()
         self.contacts_tab = self.create_contacts_tab()
         tabs.addTab(self.create_history_tab(), QIcon(":icons/tab_history.png"), _('History'))
@@ -154,6 +155,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
         add_optional_tab(tabs, self.addresses_tab, QIcon(":icons/tab_addresses.png"), _("&Addresses"), "addresses")
         add_optional_tab(tabs, self.utxo_tab, QIcon(":icons/tab_coins.png"), _("Co&ins"), "utxo")
+        add_optional_tab(tabs, self.shuffle_tab, QIcon(":icons/tab_coins.png"), _("Shuffle"), "shuffle")
         add_optional_tab(tabs, self.contacts_tab, QIcon(":icons/tab_contacts.png"), _("Con&tacts"), "contacts")
         add_optional_tab(tabs, self.console_tab, QIcon(":icons/tab_console.png"), _("Con&sole"), "console")
 
@@ -332,6 +334,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.history_list.update()
         self.address_list.update()
         self.utxo_list.update()
+        self.shuffle_list.update()
         self.need_update.set()
         # Once GUI has been initialized check if we want to announce something since the callback has been called before the GUI was initialized
         self.notify_transactions()
@@ -490,6 +493,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         view_menu = menubar.addMenu(_("&View"))
         add_toggle_action(view_menu, self.addresses_tab)
         add_toggle_action(view_menu, self.utxo_tab)
+        add_toggle_action(view_menu, self.shuffle_tab)
         add_toggle_action(view_menu, self.contacts_tab)
         add_toggle_action(view_menu, self.console_tab)
 
@@ -724,6 +728,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.request_list.update()
         self.address_list.update()
         self.utxo_list.update()
+        self.shuffle_list.update()
         self.contact_list.update()
         self.invoice_list.update()
         self.update_completions()
@@ -1526,6 +1531,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.set_frozen_state(addrs, freeze)
         self.address_list.update()
         self.utxo_list.update()
+        self.shuffle_list.update()
         self.update_fee()
 
     def create_list_tab(self, l):
@@ -1548,6 +1554,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def create_utxo_tab(self):
         from utxo_list import UTXOList
         self.utxo_list = l = UTXOList(self)
+        return self.create_list_tab(l)
+
+    def create_shuffle_tab(self):
+        from shuffle import ShuffleList
+        self.shuffle_list = l = ShuffleList(self)
         return self.create_list_tab(l)
 
     def create_contacts_tab(self):
