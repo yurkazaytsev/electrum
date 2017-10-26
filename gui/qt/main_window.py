@@ -334,7 +334,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.history_list.update()
         self.address_list.update()
         self.utxo_list.update()
-        self.shuffle_list.update()
+        # self.shuffle_list.update()
         self.need_update.set()
         # Once GUI has been initialized check if we want to announce something since the callback has been called before the GUI was initialized
         self.notify_transactions()
@@ -346,6 +346,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.update_console()
         self.clear_receive_tab()
         self.request_list.update()
+        self.set_coinshuffle_addrs()
         self.tabs.show()
         self.init_geometry()
         if self.config.get('hide_gui') and self.gui_object.tray.isVisible():
@@ -728,7 +729,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.request_list.update()
         self.address_list.update()
         self.utxo_list.update()
-        self.shuffle_list.update()
+        # self.shuffle_list.update()
         self.contact_list.update()
         self.invoice_list.update()
         self.update_completions()
@@ -1531,7 +1532,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.set_frozen_state(addrs, freeze)
         self.address_list.update()
         self.utxo_list.update()
-        self.shuffle_list.update()
+        # self.shuffle_list.update()
         self.update_fee()
 
     def create_list_tab(self, l):
@@ -1556,10 +1557,72 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.utxo_list = l = UTXOList(self)
         return self.create_list_tab(l)
 
+    def set_coinshuffle_addrs(self):
+        self.coinshufle_input_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
+        self.coinshuffle_outputs_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
+        self.coinshuffle_inputs.setItmes(self.wallet)
+        self.coinshuffle_changes.setItmes(self.wallet)
+        # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
+
+
     def create_shuffle_tab(self):
-        from shuffle import ShuffleList
-        self.shuffle_list = l = ShuffleList(self)
-        return self.create_list_tab(l)
+        # from shuffle import ShuffleList
+        # self.shuffle_list = ShuffleList(self)
+        from shuffle import InputAdressWidget
+        from shuffle import ChangeAdressWidget
+
+        self.shuffle_grid = grid = QGridLayout()
+        grid.setSpacing(8)
+        grid.setColumnStretch(3, 1)
+
+        #Q ComboBox for adresses
+        self.coinshuffle_inputs = InputAdressWidget()
+        self.coinshuffle_changes = ChangeAdressWidget()
+        self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
+        self.coinshuffle_limit = 1e5 # limit in satosis
+        self.coinshuffle_max_button = EnterButton(_("Max"), lambda: self.coinshuffle_amount.setAmount(self.coinshuffle_limit))
+        self.coinshuffle_max_button.setFixedWidth(140)
+
+        def fee_cb(dyn, pos, fee_rate):
+            if dyn:
+                self.config.set_key('fee_level', pos, False)
+            else:
+                self.config.set_key('fee_per_kb', fee_rate, False)
+            self.spend_max() if self.is_max else self.update_fee()
+
+        self.coinshuffle_fee_slider = FeeSlider(self, self.config, fee_cb)
+        self.coinshuffle_fee_slider.setFixedWidth(140)
+        self.coinshuffle_start_button = EnterButton(_("Shuffle"),lambda: QMessageBox.information(None,"1","2"))
+        # self.coinshufle_input_addrs = []
+        # self.coinshuffle_inputs.addItems()
+
+        grid.addWidget(QLabel(_('Shuffle input address')), 1, 0)
+        grid.addWidget(QLabel(_('Shuffle change address')), 2, 0)
+        grid.addWidget(QLabel(_('Amount')), 3, 0)
+        grid.addWidget(QLabel(_('Fee')), 4, 0)
+        grid.addWidget(self.coinshuffle_inputs,1,1,1,-1)
+        grid.addWidget(self.coinshuffle_changes,2,1,1,-1)
+        grid.addWidget(self.coinshuffle_amount,3,1)
+        grid.addWidget(self.coinshuffle_max_button, 3, 2)
+        grid.addWidget(self.coinshuffle_fee_slider, 4, 1)
+        grid.addWidget(self.coinshuffle_start_button, 5, 0)
+
+        vbox0 = QVBoxLayout()
+        vbox0.addLayout(grid)
+        hbox = QHBoxLayout()
+        hbox.addLayout(vbox0)
+        w = QWidget()
+        vbox = QVBoxLayout(w)
+        vbox.addLayout(hbox)
+        vbox.addStretch(1)
+        # vbox.addWidget(self.invoices_label)
+        # vbox.addWidget(self.invoice_list)
+        # vbox.setStretchFactor(self.invoice_list, 1000)
+        # w.searchable_list = self.invoice_list
+        # run_hook('create_send_tab', grid)
+        # self.shuffle_list = l = ShuffleList(self)
+        # return self.create_list_tab(l)
+        return w
 
     def create_contacts_tab(self):
         from contact_list import ContactList

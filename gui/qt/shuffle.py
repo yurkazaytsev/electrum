@@ -27,6 +27,37 @@ from util import *
 from electroncash.i18n import _
 # from electroncash.bitcoin import is_address
 
+class InputAdressWidget(QComboBox):
+
+    # def __init__(self,parent = None):
+    #     QComboBox.__init__(self)
+    #     self.inputsArray = []
+
+    def clear_addresses(self):
+        self.inputsArray = []
+        self.clear()
+
+    def setItmes(self, wallet):
+        self.inputsArray = wallet.get_utxos()
+        for utxo in self.inputsArray:
+            self.addItem(utxo.get('address')+':'+ str(utxo['value']))
+
+class ChangeAdressWidget(QComboBox):
+
+    # def __init__(self,parent = None):
+    #     QComboBox.__init__(self)
+    #     self.inputsArray = []
+
+    def clear_addresses(self):
+        self.ChangesArray = []
+        self.clear()
+
+    def setItmes(self, wallet):
+        self.ChangesArray = wallet.get_change_addresses()
+        self.addItem('Not use change address')
+        for addr in self.ChangesArray:
+            self.addItem(addr)
+
 
 class ShuffleList(MyTreeWidget):
     filter_columns = [0, 2]  # Address, Label
@@ -68,7 +99,7 @@ class ShuffleList(MyTreeWidget):
         coins = filter(lambda x: self.get_name(x) in selected, self.utxos)
 
         # menu.addAction(_("Spend"), lambda: self.parent.spend_coins(coins))
-        menu.addAction(_("Dzin!"), lambda: QMessageBox.information(self.parent,"1","2"))
+        menu.addAction(_("Shuffle"), lambda: QMessageBox.information(self.parent,"1","2"))
         if len(selected) == 1:
             txid = selected[0].split(':')[0]
             tx = self.wallet.transactions.get(txid)
