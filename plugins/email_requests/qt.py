@@ -37,11 +37,10 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email import Encoders
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-import PyQt5.QtCore as QtCore
-import PyQt5.QtGui as QtGui
-from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+import PyQt4.QtCore as QtCore
+import PyQt4.QtGui as QtGui 
 
 from electroncash.plugins import BasePlugin, hook
 from electroncash.paymentrequest import PaymentRequest
@@ -129,13 +128,13 @@ class Plugin(BasePlugin):
         if self.imap_server and self.username and self.password:
             self.processor = Processor(self.imap_server, self.username, self.password, self.on_receive)
             self.processor.start()
-        self.obj = QEmailSignalObject()
-        self.obj.email_new_invoice_signal.connect(self.new_invoice)
+	self.obj = QObject()
+	self.obj.connect(self.obj, SIGNAL('email:new_invoice'), self.new_invoice) 
 
     def on_receive(self, pr_str):
         self.print_error('received payment request')
         self.pr = PaymentRequest(pr_str)
-        self.obj.email_new_invoice_signal.emit()
+        self.obj.emit(SIGNAL('email:new_invoice'))
 
     def new_invoice(self):
         self.parent.invoices.add(self.pr)

@@ -61,7 +61,7 @@ DEFAULT_SERVERS = {
     'electroncash.bitcoinplug.com': DEFAULT_PORTS,  
     'bch.curalle.ovh': DEFAULT_PORTS,    
     'electron.ueo.ch': DEFAULT_PORTS,
-    'electron.cash.dragon.zone': { 's': '50001'},
+    'electron-cash.dragon.zone': { 's': '50001'},
     'electroncash.cascharia.com': {'s': '50002'} #BUCash:1.1.1
 }
 

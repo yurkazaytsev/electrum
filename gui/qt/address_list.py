@@ -43,7 +43,7 @@ class AddressList(MyTreeWidget):
     def on_update(self):
         self.wallet = self.parent.wallet
         item = self.currentItem()
-        current_address = str(item.data(0, Qt.UserRole)) if item else None
+        current_address = item.data(0, Qt.UserRole).toString() if item else None
         self.clear()
         receiving_addresses = self.wallet.get_receiving_addresses()
         change_addresses = self.wallet.get_change_addresses()
@@ -73,9 +73,9 @@ class AddressList(MyTreeWidget):
                     address_item.setData(0, Qt.UserRole, address)
                     address_item.setData(0, Qt.UserRole+1, True) # label can be edited
                     if self.wallet.is_frozen(address):
-                        address_item.setBackground(0, QColor('lightblue'))
+                        address_item.setBackgroundColor(0, QColor('lightblue'))
                     if self.wallet.is_beyond_limit(address, is_change):
-                        address_item.setBackground(0, QColor('red'))
+                        address_item.setBackgroundColor(0, QColor('red'))
                     if is_used:
                         if not used_flag:
                             seq_item.insertChild(0, used_item)
