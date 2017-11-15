@@ -90,7 +90,6 @@ class QRDialog(WindowModalDialog):
         vbox = QVBoxLayout()
         qrw = QRCodeWidget(data)
 	p = QPixmap.grabWindow(qrw.winId())
-        qscreen = QApplication.primaryScreen()
         vbox.addWidget(qrw, 1)
         if show_text:
             text = QTextEdit()
