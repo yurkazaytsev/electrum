@@ -1,4 +1,4 @@
-from PyQt5.QtGui import *
+from PyQt4.QtGui import *
 from electroncash.i18n import _
 
 
@@ -9,7 +9,7 @@ from electroncash.util import format_satoshis
 from electroncash.bitcoin import COIN
 
 import matplotlib
-matplotlib.use('Qt5Agg')
+matplotlib.use('Qt4Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.patches import Ellipse
@@ -37,7 +37,7 @@ def plot_history(wallet, history):
     plt.subplots_adjust(bottom=0.2)
     plt.xticks( rotation=25 )
     ax = plt.gca()
-    plt.ylabel('BCC')
+    plt.ylabel('BCH')
     plt.xlabel('Month')
     xfmt = md.DateFormatter('%Y-%m-%d')
     ax.xaxis.set_major_formatter(xfmt)

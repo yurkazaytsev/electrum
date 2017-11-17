@@ -1,9 +1,10 @@
 from functools import partial
 import threading
 
-from PyQt5.Qt import Qt
-from PyQt5.Qt import QGridLayout, QInputDialog, QPushButton
-from PyQt5.Qt import QVBoxLayout, QLabel
+from PyQt4.Qt import Qt
+from PyQt4.Qt import QGridLayout, QInputDialog, QPushButton
+from PyQt4.Qt import QVBoxLayout, QLabel, SIGNAL
+
 from electroncash_gui.qt.util import *
 
 from .plugin import TIM_NEW, TIM_RECOVER, TIM_MNEMONIC
@@ -378,7 +379,7 @@ class SettingsDialog(WindowModalDialog):
         def change_homescreen():
             from PIL import Image  # FIXME
             dialog = QFileDialog(self, _("Choose Homescreen"))
-            filename, __ = dialog.getOpenFileName()
+            filename = dialog.getOpenFileName()
             if filename:
                 im = Image.open(str(filename))
                 if im.size != (hs_cols, hs_rows):

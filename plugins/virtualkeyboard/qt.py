@@ -1,6 +1,5 @@
 import random
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import (QVBoxLayout, QGridLayout, QPushButton)
+from PyQt4.QtGui import * 
 from electroncash.plugins import BasePlugin, hook
 from electroncash.i18n import _
 

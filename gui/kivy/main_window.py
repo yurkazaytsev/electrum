@@ -149,7 +149,7 @@ class ElectrumWindow(App):
         self._trigger_update_history()
 
     def _get_bu(self):
-        return self.electrum_config.get('base_unit', 'mBCC')
+        return self.electrum_config.get('base_unit', 'mBCH')
 
     def _set_bu(self, value):
         assert value in base_units.keys()
@@ -589,7 +589,7 @@ class ElectrumWindow(App):
         self.invoices_screen = None
         self.receive_screen = None
         self.requests_screen = None
-        self.icon = "icons/electrum.png"
+        self.icon = "icons/electron-cash.png"
         self.tabs = self.root.ids['tabs']
 
     def update_interfaces(self, dt):

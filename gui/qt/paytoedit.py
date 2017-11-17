@@ -23,9 +23,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QCompleter, QPlainTextEdit
+from PyQt4.QtCore import *
+from PyQt4.QtGui import * 
 from qrtextedit import ScanQRTextEdit
 
 import re
@@ -205,7 +204,7 @@ class PayToEdit(ScanQRTextEdit):
         if self.c.widget() != self:
             return
         tc = self.textCursor()
-        extra = len(completion) - len(self.c.completionPrefix())
+        extra = completion.length() - self.c.completionPrefix().length()
         tc.movePosition(QTextCursor.Left)
         tc.movePosition(QTextCursor.EndOfWord)
         tc.insertText(completion.right(extra))
@@ -238,14 +237,14 @@ class PayToEdit(ScanQRTextEdit):
         QPlainTextEdit.keyPressEvent(self, e)
 
         ctrlOrShift = e.modifiers() and (Qt.ControlModifier or Qt.ShiftModifier)
-        if self.c is None or (ctrlOrShift and not e.text()):
+	if self.c is None or (ctrlOrShift and e.text().isEmpty()): 
             return
 
-        eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="
+	eow = QString("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=")  
         hasModifier = (e.modifiers() != Qt.NoModifier) and not ctrlOrShift;
         completionPrefix = self.textUnderCursor()
 
-        if hasModifier or not e.text() or len(completionPrefix) < 1 or eow.find(e.text()[-1]) >= 0:
+        if hasModifier or e.text().isEmpty() or completionPrefix.length() < 1 or eow.contains(e.text().right(1)): 
             self.c.popup().hide()
             return
 

@@ -34,10 +34,10 @@ from decimal import Decimal
 import base64
 from functools import partial
 
-import PyQt5
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-import PyQt5.QtCore as QtCore
+import PyQt4
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+import PyQt4.QtCore as QtCore
 
 import icons_rc
 
@@ -81,7 +81,7 @@ class StatusBarButton(QPushButton):
         self.setIconSize(QSize(25,25))
 
     def onPress(self, checked=False):
-        '''Drops the unwanted PyQt5 "checked" argument'''
+        '''Drops the unwanted PyQt4 "checked" argument'''
         self.func()
 
     def keyPressEvent(self, e):
@@ -93,15 +93,7 @@ from electroncash.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIR
 
 
 class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
-
-    payment_request_ok_signal = pyqtSignal()
-    payment_request_error_signal = pyqtSignal()
-    new_fx_quotes_signal = pyqtSignal()
-    new_fx_history_signal = pyqtSignal()
-    network_signal = pyqtSignal(str, object)
-    alias_received_signal = pyqtSignal()
-    computing_privkeys_signal = pyqtSignal()
-    show_privkeys_signal = pyqtSignal()
+ 
 
     def __init__(self, gui_object, wallet):
         QMainWindow.__init__(self)
@@ -165,7 +157,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.config.get("is_maximized"):
             self.showMaximized()
 
-        self.setWindowIcon(QIcon(":icons/electrum.png"))
+        self.setWindowIcon(QIcon(":icons/electron-cash.png"))
         self.init_menubar()
 
         wrtabs = weakref.proxy(tabs)
@@ -178,13 +170,13 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         for i in range(wrtabs.count()):
             QShortcut(QKeySequence("Alt+" + str(i + 1)), self, lambda i=i: wrtabs.setCurrentIndex(i))
 
-        self.payment_request_ok_signal.connect(self.payment_request_ok)
-        self.payment_request_error_signal.connect(self.payment_request_error)
-        self.history_list.setFocus(True)
+        self.connect(self, QtCore.SIGNAL('payment_request_ok'), self.payment_request_ok)
+	self.connect(self, QtCore.SIGNAL('payment_request_error'), self.payment_request_error)
+	self.history_list.setFocus(True)
 
         # network callbacks
         if self.network:
-            self.network_signal.connect(self.on_network_qt)
+            self.connect(self,QtCore.SIGNAL('network'), self.on_network_qt)
             interests = ['updated', 'new_transaction', 'status',
                          'banner', 'verified', 'fee']
             # To avoid leaking references to "self" that prevent the
@@ -196,8 +188,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             self.console.showMessage(self.network.banner)
             self.network.register_callback(self.on_quotes, ['on_quotes'])
             self.network.register_callback(self.on_history, ['on_history'])
-            self.new_fx_quotes_signal.connect(self.on_fx_quotes)
-            self.new_fx_history_signal.connect(self.on_fx_history)
+            self.connect(self, SIGNAL('new_fx_quotes'), self.on_fx_quotes)
+            self.connect(self, SIGNAL('new_fx_history'), self.on_fx_history)
 
         # update fee slider in case we missed the callback
         self.fee_slider.update()
@@ -206,14 +198,14 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.fetch_alias()
 
     def on_history(self, b):
-        self.new_fx_history_signal.emit()
+        self.emit(SIGNAL('new_fx_history'))
 
     def on_fx_history(self):
         self.history_list.refresh_headers()
         self.history_list.update()
 
     def on_quotes(self, b):
-        self.new_fx_quotes_signal.emit()
+        self.emit(SIGNAL('new_fx_quotes'))
 
     def on_fx_quotes(self):
         self.update_status()
@@ -285,14 +277,13 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def on_network(self, event, *args):
         if event == 'updated':
             self.need_update.set()
-            self.gui_object.network_updated_signal_obj.network_updated_signal \
-                .emit(event, args)
+            self.emit(QtCore.SIGNAL('updated'), event, *args)
 
         elif event == 'new_transaction':
             self.tx_notifications.append(args[0])
         elif event in ['status', 'banner', 'verified', 'fee']:
             # Handle in GUI thread
-            self.network_signal.emit(event, args)
+            self.emit(QtCore.SIGNAL('network'), event, *args)
         else:
             self.print_error("unexpected network message:", event, args)
 
@@ -316,7 +307,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             alias = str(alias)
             def f():
                 self.alias_info = self.contacts.resolve_openalias(alias)
-                self.alias_received_signal.emit()
+                self.emit(SIGNAL('alias_received'))
             t = threading.Thread(target=f)
             t.setDaemon(True)
             t.start()
@@ -368,7 +359,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def watching_only_changed(self):
         title = 'Electron Cash %s  -  %s' % (self.wallet.electrum_version,
-                                        self.wallet.basename())
+                                        self.wallet.basename().decode('utf-8'))
         extra = [self.wallet.storage.get('wallet_type', '?')]
         if self.wallet.is_watching_only():
             self.warn_if_watching_only()
@@ -391,7 +382,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def open_wallet(self):
         wallet_folder = self.get_wallet_folder()
-        filename, __ = QFileDialog.getOpenFileName(self, "Select your wallet file", wallet_folder)
+        filename = unicode(QFileDialog.getOpenFileName(self, "Select your wallet file", wallet_folder))
         if not filename:
             return
         self.gui_object.new_window(str(filename))
@@ -400,7 +391,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def backup_wallet(self):
         path = self.wallet.storage.path
         wallet_folder = os.path.dirname(path)
-        filename, __ = QFileDialog.getSaveFileName(self, _('Enter a filename for the copy of your wallet'), wallet_folder)
+        filename = unicode (QFileDialog.getSaveFileName(self, _('Enter a filename for the copy of your wallet'), wallet_folder))
         if not filename:
             return
 
@@ -409,10 +400,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             try:
                 shutil.copy2(path, new_path)
                 self.show_message(_("A copy of your wallet file was created in")+" '%s'" % str(new_path), title=_("Wallet backup created"))
-            except (IOError, os.error) as reason:
+            except (IOError, os.error), reason:
                 self.show_critical(_("Electrum was unable to copy your wallet file to the specified location.") + "\n" + str(reason), title=_("Unable to create backup"))
 
     def update_recently_visited(self, filename):
+	filename = filename.decode('utf-8')
         recent = self.config.get('recently_open', [])
         try:
             sorted(recent)
@@ -427,7 +419,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         for i, k in enumerate(sorted(recent)):
             b = os.path.basename(k)
             def loader(k):
-                return lambda: self.gui_object.new_window(k)
+                return lambda: self.gui_object.new_window(k.encode('utf-8'))
             self.recently_visited_menu.addAction(b, loader(k)).setShortcut(QKeySequence("Ctrl+%d"%(i+1)))
         self.recently_visited_menu.setEnabled(len(recent))
 
@@ -523,7 +515,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         help_menu.addAction(_("&About"), self.show_about)
         help_menu.addAction(_("&Official website"), lambda: webbrowser.open("http://electroncash.org"))
         help_menu.addSeparator()
-        help_menu.addAction(_("&Electrum Documentation"), lambda: webbrowser.open("http://docs.electrum.org/")).setShortcut(QKeySequence.HelpContents)
+        help_menu.addAction(_("Documentation"), lambda: webbrowser.open("http://electroncash.readthedocs.io/")).setShortcut(QKeySequence.HelpContents)
         help_menu.addAction(_("&Report Bug"), self.show_report_bug)
         help_menu.addSeparator()
         help_menu.addAction(_("&Donate to server"), self.donate_to_server)
@@ -585,22 +577,22 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     # custom wrappers for getOpenFileName and getSaveFileName, that remember the path selected by the user
     def getOpenFileName(self, title, filter = ""):
-        directory = self.config.get('io_dir', os.path.expanduser('~'))
-        fileName, __ = QFileDialog.getOpenFileName(self, title, directory, filter)
+        directory = self.config.get('io_dir', unicode(os.path.expanduser('~')))
+        fileName = unicode(QFileDialog.getOpenFileName(self, title, directory, filter))
         if fileName and directory != os.path.dirname(fileName):
             self.config.set_key('io_dir', os.path.dirname(fileName), True)
         return str(fileName)
 
     def getSaveFileName(self, title, filename, filter = ""):
-        directory = self.config.get('io_dir', os.path.expanduser('~'))
+        directory = self.config.get('io_dir', unicode(os.path.expanduser('~')))
         path = os.path.join( directory, filename )
-        fileName, __ = QFileDialog.getSaveFileName(self, title, path, filter)
+        fileName = unicode(QFileDialog.getSaveFileName(self, title, path, filter))
         if fileName and directory != os.path.dirname(fileName):
             self.config.set_key('io_dir', os.path.dirname(fileName), True)
         return str(fileName)
 
     def connect_slots(self, sender):
-        sender.timer_signal.connect(self.timer_actions)
+        self.connect(sender, QtCore.SIGNAL('timersignal'), self.timer_actions)
 
     def timer_actions(self):
         # Note this runs in the GUI thread
@@ -632,9 +624,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.decimal_point == 2:
             return 'bits'
         if self.decimal_point == 5:
-            return 'mBCC'
+            return 'mBCH'
         if self.decimal_point == 8:
-            return 'BCC'
+            return 'BCH'
         raise Exception('Unknown base unit')
 
     def connect_fields(self, window, btc_e, fiat_e, fee_e):
@@ -714,7 +706,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             text = _("Not connected")
             icon = QIcon(":icons/status_disconnected.png")
 
-        self.tray.setToolTip("%s (%s)" % (text, self.wallet.basename()))
+        self.tray.setToolTip("%s (%s)" % (text, self.wallet.basename().decode('utf-8')))
         self.balance_label.setText(text)
         self.status_button.setIcon( icon )
 
@@ -888,7 +880,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def save_payment_request(self):
         addr = str(self.receive_address_e.text())
         amount = self.receive_amount_e.get_amount()
-        message = self.receive_message_e.text()
+        message = unicode(self.receive_message_e.text())
         if not message and not amount:
             self.show_error(_('No message or amount'))
             return False
@@ -990,7 +982,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def update_receive_qr(self):
         addr = str(self.receive_address_e.text())
         amount = self.receive_amount_e.get_amount()
-        message = self.receive_message_e.text()
+        message = unicode(self.receive_message_e.text()).encode('utf-8')
         self.save_request_button.setEnabled((amount is not None) or (message != ""))
         uri = util.create_URI(addr, amount, message)
         self.receive_qr.setData(uri)
@@ -1261,7 +1253,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.payment_request and self.payment_request.has_expired():
             self.show_error(_('Payment request has expired'))
             return
-        label = self.message_e.text()
+        label = unicode( self.message_e.text())
 
         if self.payment_request:
             outputs = self.payment_request.get_outputs()
@@ -1481,15 +1473,15 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def on_pr(self, request):
         self.payment_request = request
         if self.payment_request.verify(self.contacts):
-            self.payment_request_ok_signal.emit()
+            self.emit(SIGNAL('payment_request_ok'))
         else:
-            self.payment_request_error_signal.emit()
+            self.emit(SIGNAL('payment_request_error'))
 
     def pay_to_URI(self, URI):
         if not URI:
             return
         try:
-            out = util.parse_URI(URI, self.on_pr)
+            out = util.parse_URI(unicode(URI), self.on_pr)
         except BaseException as e:
             self.show_error(_('Invalid bitcoincash URI:') + '\n' + str(e))
             return
@@ -1540,7 +1532,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         w.searchable_list = l
         vbox = QVBoxLayout()
         w.setLayout(vbox)
-        vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.setMargin(0)
         vbox.setSpacing(0)
         vbox.addWidget(l)
         buttons = QWidget()
@@ -1851,7 +1843,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         vbox.addLayout(grid)
         vbox.addLayout(Buttons(CancelButton(d), OkButton(d)))
         if d.exec_():
-            self.set_contact(line2.text(), line1.text())
+            self.set_contact(unicode(line2.text()), str(line1.text()))
 
     def show_master_public_keys(self):
         dialog = WindowModalDialog(self, "Master Public Keys")
@@ -1932,8 +1924,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     @protected
     def do_sign(self, address, message, signature, password):
-        address  = address.text().strip()
-        message = message.toPlainText().strip()
+        address  = str(address.text()).strip()
+        message = unicode(message.toPlainText()).encode('utf-8').strip()
         if not bitcoin.is_address(address):
             self.show_message('Invalid Bitcoin Cash address.')
             return
@@ -1949,8 +1941,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.thread.add(task, on_success=show_signed_message)
 
     def do_verify(self, address, message, signature):
-        address  = address.text().strip()
-        message = message.toPlainText().strip().encode('utf-8')
+        address  = str(address.text()).strip()
+        message = unicode(message.toPlainText()).strip().encode('utf-8').strip()
         if not bitcoin.is_address(address):
             self.show_message('Invalid Bitcoin Cash address.')
             return
@@ -2014,11 +2006,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.thread.add(task, on_success=message_e.setText)
 
     def do_encrypt(self, message_e, pubkey_e, encrypted_e):
-        message = message_e.toPlainText()
+        message = unicode(message_e.toPlainText())
         message = message.encode('utf-8')
         try:
             encrypted = bitcoin.encrypt_message(message, str(pubkey_e.text()))
-            encrypted_e.setText(encrypted.decode('ascii'))
+            encrypted_e.setText(encrypted)
         except BaseException as e:
             traceback.print_exc(file=sys.stdout)
             self.show_warning(str(e))
@@ -2121,7 +2113,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         try:
             with open(fileName, "r") as f:
                 file_content = f.read()
-        except (ValueError, IOError, os.error) as reason:
+        except (ValueError, IOError, os.error), reason:
             self.show_critical(_("Electron Cash was unable to open your transaction file") + "\n" + str(reason), title=_("Unable to read file or no transaction found"))
             return
         file_content = file_content.strip()
@@ -2195,16 +2187,16 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 if done:
                     break
                 private_keys[addr] = "\n".join(self.wallet.get_private_key(addr, password))
-                self.computing_privkeys_signal.emit()
-            self.show_privkeys_signal.emit()
+                d.emit(SIGNAL('computing_privkeys'))
+            d.emit(SIGNAL('show_privkeys'))
 
         def show_privkeys():
             s = "\n".join( map( lambda x: x[0] + "\t"+ x[1], private_keys.items()))
             e.setText(s)
             b.setEnabled(True)
 
-        self.computing_privkeys_signal.connect(lambda: e.setText("Please wait... %d/%d"%(len(private_keys),len(addresses))))
-        self.show_privkeys_signal.connect(show_privkeys)
+        d.connect(d, QtCore.SIGNAL('computing_privkeys'), lambda: e.setText("Please wait... %d/%d"%(len(private_keys),len(addresses))))
+        d.connect(d, QtCore.SIGNAL('show_privkeys'), show_privkeys)
         threading.Thread(target=privkeys_thread).start()
 
         if not d.exec_():
@@ -2290,7 +2282,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             return
         try:
             self.do_export_history(self.wallet, filename, csv_button.isChecked())
-        except (IOError, os.error) as reason:
+        except (IOError, os.error), reason:
             export_error_label = _("Electron Cash was unable to produce a transaction export.")
             self.show_critical(export_error_label + "\n" + str(reason), title=_("Unable to export history"))
             return
@@ -2526,7 +2518,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             if alias:
                 self.fetch_alias()
         set_alias_color()
-        self.alias_received_signal.connect(set_alias_color)
+        self.disconnect(self, SIGNAL('alias_received'), set_alias_color)
         alias_e.editingFinished.connect(on_alias_edit)
         id_widgets.append((alias_label, alias_e))
 
@@ -2553,9 +2545,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         SSL_id_e.setReadOnly(True)
         id_widgets.append((SSL_id_label, SSL_id_e))
 
-        units = ['BCC', 'mBCC', 'bits']
+        units = ['BCH', 'mBCH', 'bits']
         msg = _('Base unit of your wallet.')\
-              + '\n1BCC=1000mBCC.\n' \
+              + '\n1BCH=1000mBCH.\n' \
               + _(' These settings affects the fields in the Send tab')+' '
         unit_label = HelpLabel(_('Base unit') + ':', msg)
         unit_combo = QComboBox()
@@ -2567,9 +2559,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 return
             edits = self.amount_e, self.fee_e, self.receive_amount_e
             amounts = [edit.get_amount() for edit in edits]
-            if unit_result == 'BCC':
+            if unit_result == 'BCH':
                 self.decimal_point = 8
-            elif unit_result == 'mBCC':
+            elif unit_result == 'mBCH':
                 self.decimal_point = 5
             elif unit_result == 'bits':
                 self.decimal_point = 2
@@ -2609,7 +2601,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         msg = _("Install the zbar package to enable this.")
         qr_label = HelpLabel(_('Video Device') + ':', msg)
         qr_combo.setEnabled(qrscanner.libzbar is not None)
-        on_video_device = lambda x: self.config.set_key("video_device",qr_combo.itemData(x), True)
+        on_video_device = lambda x: self.config.set_key("video_device",str(qr_combo.itemData(x).toString()), True)
         qr_combo.currentIndexChanged.connect(on_video_device)
         gui_widgets.append((qr_label, qr_combo))
 
@@ -2772,7 +2764,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.fx:
             self.fx.timeout = 0
 
-        self.alias_received_signal.disconnect(set_alias_color)
+        self.disconnect(self, SIGNAL('alias_received'), set_alias_color)
 
         run_hook('close_settings_dialog')
         if self.need_restart:

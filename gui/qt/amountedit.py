@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import (QLineEdit, QStyle, QStyleOptionFrame)
+from PyQt4.QtCore import *
+from PyQt4.QtGui import * 
 
 from decimal import Decimal
 from electroncash.util import format_satoshis_plain
@@ -54,7 +53,7 @@ class AmountEdit(MyLineEdit):
     def paintEvent(self, event):
         QLineEdit.paintEvent(self, event)
         if self.base_unit:
-            panel = QStyleOptionFrame()
+            panel = QStyleOptionFrameV2()
             self.initStyleOption(panel)
             textRect = self.style().subElementRect(QStyle.SE_LineEditContents, panel, self)
             textRect.adjust(2, 0, -10, 0)
@@ -79,9 +78,9 @@ class BTCAmountEdit(AmountEdit):
         p = self.decimal_point()
         assert p in [2, 5, 8]
         if p == 8:
-            return 'BCC'
+            return 'BCH'
         if p == 5:
-            return 'mBCC'
+            return 'mBCH'
         if p == 2:
             return 'bits'
         raise Exception('Unknown base unit')

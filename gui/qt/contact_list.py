@@ -30,10 +30,8 @@ from electroncash.bitcoin import is_address
 from electroncash.util import block_explorer_URL, format_satoshis, format_time, age
 from electroncash.plugins import run_hook
 from electroncash.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIRED
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import (
-    QAbstractItemView, QFileDialog, QMenu, QTreeWidgetItem)
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 from util import MyTreeWidget, pr_tooltips, pr_icons
 
 
@@ -56,10 +54,10 @@ class ContactList(MyTreeWidget):
 
     def import_contacts(self):
         wallet_folder = self.parent.get_wallet_folder()
-        filename, __ = QFileDialog.getOpenFileName(self.parent, "Select your wallet file", wallet_folder)
+        filename = unicode(QFileDialog.getOpenFileName(self.parent, "Select your wallet file", wallet_folder))
         if not filename:
             return
-        self.parent.contacts.import_file(unicode(filename))
+        self.parent.contacts.import_file(filename)
         self.on_update()
 
     def create_menu(self, position):
@@ -76,7 +74,6 @@ class ContactList(MyTreeWidget):
             column_data = '\n'.join([unicode(item.text(column)) for item in selected])
             menu.addAction(_("Copy %s")%column_title, lambda: self.parent.app.clipboard().setText(column_data))
             if column in self.editable_columns:
-                item = self.currentItem()
                 menu.addAction(_("Edit %s")%column_title, lambda: self.editItem(item, column))
             menu.addAction(_("Pay to"), lambda: self.parent.payto_contacts(keys))
             menu.addAction(_("Delete"), lambda: self.parent.delete_contacts(keys))
@@ -89,7 +86,7 @@ class ContactList(MyTreeWidget):
 
     def on_update(self):
         item = self.currentItem()
-        current_key = str(item.data(0, Qt.UserRole)) if item else None
+        current_key = item.data(0, Qt.UserRole).toString() if item else None
         self.clear()
         for key in sorted(self.parent.contacts.keys()):
             _type, name = self.parent.contacts[key]

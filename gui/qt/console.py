@@ -2,9 +2,8 @@
 
 import sys, os, re
 import traceback, platform
-from PyQt5 import QtCore
-from PyQt5 import QtGui
-from PyQt5 import QtWidgets
+from PyQt4 import QtCore
+from PyQt4 import QtGui 
 from electroncash import util
 
 
@@ -16,9 +15,9 @@ else:
     MONOSPACE_FONT = 'monospace'
 
 
-class Console(QtWidgets.QPlainTextEdit):
+class Console(QtGui.QPlainTextEdit):
     def __init__(self, prompt='>> ', startup_message='', parent=None):
-        QtWidgets.QPlainTextEdit.__init__(self, parent)
+        QtGui.QPlainTextEdit.__init__(self, parent)
 
         self.prompt = prompt
         self.history = []
@@ -313,7 +312,7 @@ welcome_message = '''
 '''
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
     console = Console(startup_message=welcome_message)
     console.updateNamespace({'myVar1' : app, 'myVar2' : 1234})
     console.show()

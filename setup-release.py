@@ -28,7 +28,7 @@ if sys.version_info[:3] < (2, 6, 0):
 if sys.platform == 'darwin':
     from plistlib import Plist
     plist = Plist.fromFile('Info.plist')
-    plist.update(dict(CFBundleIconFile='electrum.icns'))
+    plist.update(dict(CFBundleIconFile='electron.icns'))
 
     shutil.copy(mainscript, mainscript + '.py')
     mainscript += '.py'
@@ -36,9 +36,9 @@ if sys.platform == 'darwin':
         setup_requires=['py2app'],
         app=[mainscript],
         options=dict(py2app=dict(argv_emulation=False,
-                                 includes=['PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWebKit', 'PyQt5.QtNetwork', 'sip'],
+                                 includes=['PyQt4.QtCore', 'PyQt4.QtGui', 'PyQt4.QtWebKit', 'PyQt4.QtNetwork', 'sip'],
                                  packages=['lib', 'gui', 'plugins', 'packages'],
-                                 iconfile='electrum.icns',
+                                 iconfile='electron.icns',
                                  plist=plist,
                                  resources=["icons"])),
     )
