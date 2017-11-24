@@ -30,11 +30,18 @@ import threading
 import base64
 from functools import partial
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-import PyQt5.QtCore as QtCore
-import PyQt5.QtGui as QtGui
-from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+# from PyQt5.QtGui import *
+# from PyQt5.QtCore import *
+# import PyQt5.QtCore as QtCore
+# import PyQt5.QtGui as QtGui
+# from PyQt5.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+import PyQt4.QtCore as QtCore
+import PyQt4.QtGui as QtGui
+from PyQt4.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+
 
 from electroncash.plugins import BasePlugin, hook
 # from electroncash.paymentrequest import PaymentRequest
