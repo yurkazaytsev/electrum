@@ -25,13 +25,29 @@
 
 from util import *
 from electroncash.i18n import _
+from electroncash_plugins.coinshuffle.test_client import protocolThread
+from electroncash.bitcoin import regenerate_key
 # from electroncash.bitcoin import is_address
 
-class InputAdressWidget(QComboBox):
+# def start_protocol(parent, input_address, change_address, amount, fee, password = None):
+#     if parent.wallet.has_password():
+#         try:
+#             password = parent.password_dialog(parent=parent)
+#             if password is None:
+#                 # User cancelled password input
+#                 return
+#
+    # parent.coinshuffle_start_button.setEnabled(False)
+    # print(input_address)
+    # priv_key = parent.wallet.get_private_key(input_address, password )
+    # sk = regenerate_key(priv_key)
+    # addr_new = parent.wallet.create_new_address(False)
+    # pThread = protocolThread("localhost", 8080, parent.network, amount, fee, sk, addr_new, change_address)
+    # pThread.start()
 
-    # def __init__(self,parent = None):
-    #     QComboBox.__init__(self)
-    #     self.inputsArray = []
+
+
+class InputAdressWidget(QComboBox):
 
     def clear_addresses(self):
         self.inputsArray = []
@@ -41,6 +57,25 @@ class InputAdressWidget(QComboBox):
         self.inputsArray = wallet.get_utxos()
         for utxo in self.inputsArray:
             self.addItem(utxo.get('address')+':'+ str(utxo['value']))
+
+    def get_input_address(self):
+        return self.inputsArray[self.currentIndex()]['address']
+
+    def get_input_value(self):
+        return self.inputsArray[self.currentIndex()]['value']
+
+class ConsoleOutput(QLineEdit):
+
+    def __init__(self):
+        QLineEdit.__init__(self)
+        self.setText('Console output go here')
+        self.setReadOnly(True)
+
+    def send(self, message):
+        self.setText(str(message))
+
+    def put(self, message):
+        self.send(message)
 
 class ChangeAdressWidget(QComboBox):
 
@@ -57,6 +92,13 @@ class ChangeAdressWidget(QComboBox):
         self.addItem('Not use change address')
         for addr in self.ChangesArray:
             self.addItem(addr)
+
+    def get_change_address(self):
+        i = self.currentIndex()
+        if i > 0:
+            return self.ChangesArray[i-1]
+        else:
+            return None
 
 
 class ShuffleList(MyTreeWidget):

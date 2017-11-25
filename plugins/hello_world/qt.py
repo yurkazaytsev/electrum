@@ -40,7 +40,8 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import PyQt4.QtCore as QtCore
 import PyQt4.QtGui as QtGui
-from PyQt4.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+# from PyQt4.QtWidgets import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
+from PyQt4.QtGui import (QVBoxLayout, QLabel, QGridLayout, QLineEdit)
 
 
 from electroncash.plugins import BasePlugin, hook

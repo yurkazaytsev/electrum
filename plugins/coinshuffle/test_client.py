@@ -24,12 +24,15 @@ class protocolThread(threading.Thread):
     """
     This class emulate thread with protocol run
     """
-    def __init__(self, host, port, network, amount, fee, sk, addr_new, change):
+    def __init__(self, host, port, network, amount, fee, sk, addr_new, change, logger = None):
         threading.Thread.__init__(self)
         self.messages = Messages()
         self.income = Channel()
         self.outcome = Channel()
-        self.logger = ChannelWithPrint()
+        if not logger:
+            self.logger = ChannelWithPrint()
+        else:
+            self.logger = logger    
         self.commutator = Commutator(self.income, self.outcome, logger = self.logger)
         # G = generator_secp256k1
         # _r  = G.order()
