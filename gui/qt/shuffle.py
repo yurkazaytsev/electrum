@@ -71,9 +71,11 @@ class ConsoleOutput(QLineEdit):
         self.setText('Console output go here')
         self.setReadOnly(True)
 
+    # this is for using is as a channel
     def send(self, message):
         self.setText(str(message))
-
+        
+    # this is for using is as a channel
     def put(self, message):
         self.send(message)
 

@@ -1557,14 +1557,27 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
 
     @protected
-    def start_coinshuffle_protocol(self, input_address, change_address, amount, fee, password, logger = None):
+    # def start_coinshuffle_protocol(self, input_address, change_address, amount, fee, password, logger = None):
+    def start_coinshuffle_protocol(self, password):
         from electroncash_plugins.coinshuffle.test_client import protocolThread
         from electroncash.bitcoin import regenerate_key
+        try:
+            server_params = self.config.get('coinshuffleserver').split(":")
+            server = server_params[0]
+            port = int(server_params[1])
+        except:
+            self.coinshuffle_text_output.setText('Wrong server connection string')
+            return 
+        input_address = self.coinshuffle_inputs.get_input_address()
+        change_address = self.coinshuffle_changes.get_change_address()
+        amount = self.coinshuffle_amount.get_amount()
+        fee = self.coinshuffle_fee.get_amount()
+        logger =  self.coinshuffle_text_output
         self.coinshuffle_start_button.setEnabled(False)
         priv_key = self.wallet.get_private_key(input_address, password)
         sk = regenerate_key(priv_key[0])
         addr_new = self.wallet.create_new_address(False)
-        pThread = protocolThread("localhost", 8080, self.network, amount, fee, sk, addr_new, change_address, logger = logger)
+        pThread = protocolThread(server, port, self.network, amount, fee, sk, addr_new, change_address, logger = logger)
         pThread.start()
 
     def check_sufficient_ammount(self):
@@ -1576,7 +1589,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 self.coinshuffle_start_button.setEnabled(True)
         else:
             self.coinshuffle_start_button.setEnabled(False)
-        self.coinshuffle_text_output.setText(str(shuffle_amount))
+        # self.coinshuffle_text_output.setText(self.config.get('coinshuffleserver'))
 
     def create_shuffle_tab(self):
         # from shuffle import ShuffleList
@@ -1613,7 +1626,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         # self.coinshuffle_fee_slider = FeeSlider(self, self.config, fee_cb)
         # self.coinshuffle_fee_slider.setFixedWidth(140)
         # self.coinshuffle_start_button = EnterButton(_("Shuffle"),lambda: QMessageBox.information(None,"1","2"))
-        self.coinshuffle_start_button = EnterButton(_("Shuffle"), lambda: self.start_coinshuffle_protocol(self.coinshuffle_inputs.get_input_address(), self.coinshuffle_changes.get_change_address(), self.coinshuffle_amount.get_amount(), self.coinshuffle_fee.get_amount(), logger = self.coinshuffle_text_output))
+        # self.coinshuffle_start_button = EnterButton(_("Shuffle"), lambda: self.start_coinshuffle_protocol(self.coinshuffle_inputs.get_input_address(), self.coinshuffle_changes.get_change_address(), self.coinshuffle_amount.get_amount(), self.coinshuffle_fee.get_amount(), logger = self.coinshuffle_text_output))
+        self.coinshuffle_start_button = EnterButton(_("Shuffle"),lambda: self.start_coinshuffle_protocol())
         self.coinshuffle_start_button.setEnabled(False)
         # start_protocol(self.wallet, self.network, self.coinshuffle_inputs.get_input_address, )
         # self.coinshufle_input_addrs = []
