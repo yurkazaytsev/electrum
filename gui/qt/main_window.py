@@ -1556,29 +1556,48 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.coinshuffle_changes.setItmes(self.wallet)
         # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
 
+    def process_protocol_messages(self, message):
+        if message[-17:] == "complete protocol":
+            self.coinshuffle_start_button.setEnabled(True)
+            if self.pThread.tx:
+                self.show_transaction(self.pThread.tx)
+                self.pThread.join()
+                # self.coinshuffle_text_output.clear()
+                # self.coinshuffle_text_output.setText(tx.raw)
+        else:
+            self.coinshuffle_text_output.append(message)
+
     @protected
     # def start_coinshuffle_protocol(self, input_address, change_address, amount, fee, password, logger = None):
     def start_coinshuffle_protocol(self, password):
-        from electroncash_plugins.coinshuffle.test_client import protocolThread
+        from electroncash_plugins.coinshuffle.client import protocolThread
         from electroncash.bitcoin import regenerate_key
+        from shuffle import ConsoleLogger
         try:
             server_params = self.config.get('coinshuffleserver').split(":")
             server = server_params[0]
             port = int(server_params[1])
         except:
             self.coinshuffle_text_output.setText('Wrong server connection string')
-            return 
+            return
         input_address = self.coinshuffle_inputs.get_input_address()
         change_address = self.coinshuffle_changes.get_change_address()
         amount = self.coinshuffle_amount.get_amount()
         fee = self.coinshuffle_fee.get_amount()
-        logger =  self.coinshuffle_text_output
+        logger =  ConsoleLogger()
+        # logger.logUpdater.connect(lambda x: self.coinshuffle_text_output.append(x))
+        logger.logUpdater.connect(self.process_protocol_messages)
         self.coinshuffle_start_button.setEnabled(False)
         priv_key = self.wallet.get_private_key(input_address, password)
         sk = regenerate_key(priv_key[0])
         addr_new = self.wallet.create_new_address(False)
-        pThread = protocolThread(server, port, self.network, amount, fee, sk, addr_new, change_address, logger = logger)
-        pThread.start()
+        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, addr_new, change_address, logger = logger)
+        # logger.logUpdater.connect(lambda x: self.process_protocol_messages(x, pThread.tx) )
+        self.pThread.start()
+        # self.pThread.join(10*60) # Ten minutes for the protocol execution
+        # if pThread.tx:
+        #     self.coinshuffle_text_output.clear()
+        #     self.coinshuffle_text_output.setText(pThread.tx.raw)
 
     def check_sufficient_ammount(self):
         coin_amount = self.coinshuffle_inputs.get_input_value()
@@ -1604,7 +1623,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         grid.setColumnStretch(3, 1)
 
         #Q ComboBox for adresses
-        self.coinshuffle_inputs = InputAdressWidget()
+        self.coinshuffle_inputs = InputAdressWidget(decimal_point = self.get_decimal_point)
         self.coinshuffle_changes = ChangeAdressWidget()
         self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
         self.coinshuffle_fee = BTCAmountEdit(self.get_decimal_point)

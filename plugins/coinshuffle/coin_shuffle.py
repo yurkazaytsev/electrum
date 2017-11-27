@@ -101,7 +101,7 @@ class Round(object):
         else:
             self.__phase = "Blame"
             for i in offenders:
-                self.__messages.blame_insufficient_funds(offender)
+                self.__messages.blame_insufficient_funds()
                 # self.__messages.sign_last_packet(self.__sk)
                 self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
                 self.__outchan.send(self.__messages.packets.SerializeToString())

@@ -23,6 +23,9 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
 from util import *
 from electroncash.i18n import _
 from electroncash_plugins.coinshuffle.test_client import protocolThread
@@ -49,6 +52,18 @@ from electroncash.bitcoin import regenerate_key
 
 class InputAdressWidget(QComboBox):
 
+    def __init__(self, decimal_point, parent = None):
+        QComboBox.__init__(self, parent)
+        self.decimal_point = decimal_point
+
+    def amounted_value(self, value):
+        p = self.decimal_point()
+        units = {2:"bits", 5:"mBCH", 8:"BCH"}
+        if p not in  [2,5,8]:
+            p = 8
+        return str(value * (10**(- p))) + " " + units[p]
+
+
     def clear_addresses(self):
         self.inputsArray = []
         self.clear()
@@ -56,7 +71,7 @@ class InputAdressWidget(QComboBox):
     def setItmes(self, wallet):
         self.inputsArray = wallet.get_utxos()
         for utxo in self.inputsArray:
-            self.addItem(utxo.get('address')+':'+ str(utxo['value']))
+            self.addItem(utxo.get('address')+': '+ self.amounted_value(utxo['value']))
 
     def get_input_address(self):
         return self.inputsArray[self.currentIndex()]['address']
@@ -64,20 +79,35 @@ class InputAdressWidget(QComboBox):
     def get_input_value(self):
         return self.inputsArray[self.currentIndex()]['value']
 
-class ConsoleOutput(QLineEdit):
+# class ConsoleOutput(QLineEdit):
+#
+#     def __init__(self):
+#         QLineEdit.__init__(self)
+#         self.setText('Console output go here')
+#         self.setReadOnly(True)
+#
+#     # this is for using is as a channel
+#     def send(self, message):
+#         self.setText(str(message))
+#
+#     # this is for using is as a channel
+#     def put(self, message):
+#         self.send(message)
+class ConsoleLogger(QObject):
+    logUpdater  = pyqtSignal(str)
 
-    def __init__(self):
-        QLineEdit.__init__(self)
-        self.setText('Console output go here')
-        self.setReadOnly(True)
-
-    # this is for using is as a channel
     def send(self, message):
-        self.setText(str(message))
-        
-    # this is for using is as a channel
+        self.logUpdater.emit(str(message))
+
     def put(self, message):
         self.send(message)
+
+class ConsoleOutput(QTextEdit):
+
+    def __init__(self,  parent = None):
+        QTextEdit.__init__(self, parent)
+        self.setReadOnly(True)
+        self.setText('Console output go here')
 
 class ChangeAdressWidget(QComboBox):
 
