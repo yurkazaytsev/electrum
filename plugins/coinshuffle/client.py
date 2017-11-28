@@ -13,7 +13,7 @@ from coin_shuffle import Round
 # from electroncash.bitcoin import (generator_secp256k1, point_to_ser, EC_KEY)
 from ecdsa.util import number_to_string
 import ecdsa
-from lib.bitcoin import (
+from electroncash.bitcoin import (
     generator_secp256k1, point_to_ser, public_key_to_p2pkh, EC_KEY,
     bip32_root, bip32_public_derivation, bip32_private_derivation, pw_encode,
     pw_decode, Hash, public_key_from_private_key, address_from_private_key,
@@ -32,15 +32,9 @@ class protocolThread(threading.Thread):
         if not logger:
             self.logger = ChannelWithPrint()
         else:
-            self.logger = logger    
+            self.logger = logger
         self.commutator = Commutator(self.income, self.outcome, logger = self.logger)
-        # G = generator_secp256k1
-        # _r  = G.order()
-        # pvk = ecdsa.util.randrange( pow(2,256) ) %_r
-        # eck = EC_KEY(number_to_string(pvk ,_r))
-        # new_pvk = ecdsa.util.randrange( pow(2,256) ) %_r
-        # change_pvk = ecdsa.util.randrange( pow(2,256) ) %_r
-        # self.vk = eck.get_public_key(True)
+
         self.vk = sk.get_public_key(True)
         self.session = None
         self.number = None
