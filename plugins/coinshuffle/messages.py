@@ -1,4 +1,4 @@
-import electroncash_plugins.coinshuffle.protobuf.message_pb2 as message_factory
+import message_pb2 as message_factory
 from random import shuffle
 
 class Messages(object):
