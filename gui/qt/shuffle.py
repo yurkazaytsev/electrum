@@ -28,7 +28,7 @@ from PyQt4.QtGui import *
 
 from util import *
 from electroncash.i18n import _
-from electroncash_plugins.coinshuffle.test_client import protocolThread
+from electroncash_plugins.coinshuffle.client import protocolThread
 from electroncash.bitcoin import regenerate_key
 # from electroncash.bitcoin import is_address
 
