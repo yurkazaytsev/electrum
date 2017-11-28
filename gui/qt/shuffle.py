@@ -48,7 +48,32 @@ from electroncash.bitcoin import regenerate_key
     # pThread = protocolThread("localhost", 8080, parent.network, amount, fee, sk, addr_new, change_address)
     # pThread.start()
 
+class AmountSelect(QGroupBox):
 
+    def __init__(self, values, parent = None, decimal_point = None ):
+        QGroupBox.__init__(self)
+        if decimal_point:
+            self.decimal_point = decimal_point
+        else:
+            self.decimal_point = lambda: 8
+        self.values = values
+        buttons = [QRadioButton(self.add_units(value)) for value in values]
+        buttons[0].setChecked(True)
+        buttons_layout = QVBoxLayout()
+        self.button_group = QButtonGroup()
+        for i, button in enumerate(buttons):
+            buttons_layout.addWidget(button)
+            self.button_group.addButton(button, i)
+        self.setLayout(buttons_layout)
+
+    def add_units(self, value):
+        p = self.decimal_point()
+        if p not in [2, 5 , 8]:
+            p = 8
+        return str(value*(10**(-p)))+ " " + {2:"bits", 5:"mBCH", 8: "BCH" }[p]
+
+    def get_amount(self):
+        return self.values[self.button_group.checkedId()]
 
 class InputAdressWidget(QComboBox):
 
@@ -78,6 +103,8 @@ class InputAdressWidget(QComboBox):
 
     def get_input_value(self):
         return self.inputsArray[self.currentIndex()]['value']
+
+
 
 # class ConsoleOutput(QLineEdit):
 #

@@ -1,5 +1,5 @@
 from electroncash.bitcoin import (
-    MySigningKey, SECP256k1, is_address,
+    MySigningKey, SECP256k1,
     generator_secp256k1, point_to_ser, public_key_to_p2pkh, EC_KEY,
     bip32_root, bip32_public_derivation, bip32_private_derivation, pw_encode,
     pw_decode, Hash, public_key_from_private_key, address_from_private_key,
@@ -64,9 +64,8 @@ class Coin(object):
         # make transaction from inputs and outputs
         tx = Transaction.from_io(tx_inputs, tx_outputs)
         # make changes
-        tx_changes = [(TYPE_ADDRESS, changes[vk], coins[vk]['value'] - amount - fee)  for vk in changes if is_address(changes[vk])]
-        if tx_changes:
-            tx.add_outputs(tx_changes)
+        tx_changes = [(TYPE_ADDRESS, changes[vk], coins[vk]['value'] - amount - fee)  for vk in changes]
+        tx.add_outputs(tx_changes)
         return tx
 
     def get_transaction_signature(self, tx, sk):

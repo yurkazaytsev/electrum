@@ -1582,7 +1582,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             return
         input_address = self.coinshuffle_inputs.get_input_address()
         change_address = self.coinshuffle_changes.get_change_address()
-        amount = self.coinshuffle_amount.get_amount()
+        amount = self.coinshuffle_amount_radio.get_amount()
         fee = self.coinshuffle_fee.get_amount()
         logger =  ConsoleLogger()
         # logger.logUpdater.connect(lambda x: self.coinshuffle_text_output.append(x))
@@ -1601,11 +1601,13 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def check_sufficient_ammount(self):
         coin_amount = self.coinshuffle_inputs.get_input_value()
-        shuffle_amount = self.coinshuffle_amount.get_amount()
+        shuffle_amount = self.coinshuffle_amount_radio.get_amount()
         fee = self.coinshuffle_fee.get_amount()
         if shuffle_amount and fee:
             if coin_amount > (fee + shuffle_amount):
                 self.coinshuffle_start_button.setEnabled(True)
+            else:
+                self.coinshuffle_start_button.setEnabled(False)
         else:
             self.coinshuffle_start_button.setEnabled(False)
         # self.coinshuffle_text_output.setText(self.config.get('coinshuffleserver'))
@@ -1616,8 +1618,10 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         from shuffle import InputAdressWidget
         from shuffle import ChangeAdressWidget
         from shuffle import ConsoleOutput
+        from shuffle import AmountSelect
         # from shuffle import start_protocol
 
+        self.coinshuffle_amounts = [1e4, 1e3]
         self.shuffle_grid = grid = QGridLayout()
         grid.setSpacing(8)
         grid.setColumnStretch(3, 1)
@@ -1625,14 +1629,17 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         #Q ComboBox for adresses
         self.coinshuffle_inputs = InputAdressWidget(decimal_point = self.get_decimal_point)
         self.coinshuffle_changes = ChangeAdressWidget()
-        self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
+        self.coinshuffle_amount_radio = AmountSelect(self.coinshuffle_amounts, decimal_point = self.get_decimal_point)
+        # self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
         self.coinshuffle_fee = BTCAmountEdit(self.get_decimal_point)
         self.coinshuffle_limit = 1e5 # limit in satosis
-        self.coinshuffle_max_button = EnterButton(_("Max"), lambda: self.coinshuffle_amount.setAmount(self.coinshuffle_limit))
-        self.coinshuffle_max_button.setFixedWidth(140)
+        # self.coinshuffle_max_button = EnterButton(_("Max"), lambda: self.coinshuffle_amount.setAmount(self.coinshuffle_limit))
+        # self.coinshuffle_max_button.setFixedWidth(140)
         self.coinshuffle_text_output = ConsoleOutput()
 
-        self.coinshuffle_amount.textChanged.connect(self.check_sufficient_ammount)
+
+        # self.coinshuffle_amount.textChanged.connect(self.check_sufficient_ammount)
+        self.coinshuffle_amount_radio.button_group.buttonClicked.connect(self.check_sufficient_ammount)
         self.coinshuffle_fee.textChanged.connect(self.check_sufficient_ammount)
 
         # def fee_cb(dyn, pos, fee_rate):
@@ -1658,8 +1665,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         grid.addWidget(QLabel(_('Fee')), 4, 0)
         grid.addWidget(self.coinshuffle_inputs,1,1,1,-1)
         grid.addWidget(self.coinshuffle_changes,2,1,1,-1)
-        grid.addWidget(self.coinshuffle_amount,3,1)
-        grid.addWidget(self.coinshuffle_max_button, 3, 2)
+        grid.addWidget(self.coinshuffle_amount_radio,3,1)
+        # grid.addWidget(self.coinshuffle_amount,3,1)
+        # grid.addWidget(self.coinshuffle_max_button, 3, 2)
         # grid.addWidget(self.coinshuffle_fee_slider, 4, 1)
         grid.addWidget(self.coinshuffle_fee, 4, 1)
         grid.addWidget(self.coinshuffle_start_button, 5, 0)

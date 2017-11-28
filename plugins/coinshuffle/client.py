@@ -33,7 +33,8 @@ class protocolThread(threading.Thread):
             self.logger = ChannelWithPrint()
         else:
             self.logger = logger
-        self.commutator = Commutator(self.income, self.outcome, logger = self.logger)
+        # self.commutator = Commutator(self.income, self.outcome, logger = self.logger)
+        self.commutator = Commutator(self.income, self.outcome)
 
         self.vk = sk.get_public_key(True)
         self.session = None
