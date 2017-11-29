@@ -1,5 +1,5 @@
 from electroncash.bitcoin import (
-    MySigningKey, SECP256k1,
+    MySigningKey, SECP256k1, is_address,
     generator_secp256k1, point_to_ser, public_key_to_p2pkh, EC_KEY,
     bip32_root, bip32_public_derivation, bip32_private_derivation, pw_encode,
     pw_decode, Hash, public_key_from_private_key, address_from_private_key,
@@ -60,11 +60,11 @@ class Coin(object):
         # Here I use sorted to have a idential inputs order for every player
         tx_inputs = [coins[vk] for vk in sorted(coins)]
         # make outputs
-        tx_outputs = [(TYPE_ADDRESS, output, amount) for output in outputs ]
+        tx_outputs = [(TYPE_ADDRESS, output, int(amount)) for output in outputs ]
         # make transaction from inputs and outputs
         tx = Transaction.from_io(tx_inputs, tx_outputs)
         # make changes
-        tx_changes = [(TYPE_ADDRESS, changes[vk], coins[vk]['value'] - amount - fee)  for vk in changes]
+        tx_changes = [(TYPE_ADDRESS, changes[vk], int(coins[vk]['value'] - amount - fee))  for vk in changes if is_address(changes[vk])]
         tx.add_outputs(tx_changes)
         return tx
 

@@ -87,14 +87,15 @@ class Round(object):
         # blame = self.__messages.get_blame()
         # if blame
         if self.__debug:
-            self.__logchan.send("Player # " + str(self.__me)+"\n"+str(self.__inbox))
+            self.__logchan.send("Player " + str(self.__me)+"\n"+str(self.__inbox))
 
     def blame_insufficient_funds(self):
         offenders = list()
         for player in self.__players:
             # address = public_key_to_p2pkh(players[player])
             address = self.__coin.address(self.__players[player])
-            print(address)
+            # TEMPORARY
+            # self.__logchan.send(str(self.__coin.sufficient_funds(address,self.__amount + self.__fee)) + " at "+ address)
             if not self.__coin.sufficient_funds(address,self.__amount + self.__fee):
                 offenders.append(player)
         if len(offenders) == 0:
@@ -132,9 +133,9 @@ class Round(object):
             self.__change_addresses[from_key] = self.__messages.get_address()
 
         if (len(self.__encryption_keys) == self.__N):
-            self.__logchan.send('Player # '+ str(self.__me) + ' recieved all keys for test.')
+            self.__logchan.send('Player '+ str(self.__me) + ' recieved all keys for test.')
         else:
-            raise BlameException("Player # " + str(self.__me) + " not get all encryption keys")
+            raise BlameException("Player " + str(self.__me) + " not get all encryption keys")
 
 
     def encrypt_new_address(self):
@@ -294,13 +295,13 @@ class Round(object):
         self.__messages.add_signature(signature)
         self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None, self.__phase)
         self.__outchan.send(self.__messages.packets.SerializeToString())
-        self.__logchan.send("Player # " + str(self.__me) + " send transction signature")
+        self.__logchan.send("Player " + str(self.__me) + " send transction signature")
         phase = self.__messages.phases[self.__phase]
         while len(self.__inbox[phase]) < self.__N:
             self.inchan_to_inbox()
 
         signatures = {}
-        self.__logchan.send("Player # " + str(self.__me) + " got transction signatures")
+        self.__logchan.send("Player " + str(self.__me) + " got transction signatures")
         for player in self.__players:
             self.__messages.packets.ParseFromString(self.__inbox[phase][self.__players[player]])
             player_signature = self.__messages.get_signature()
@@ -309,5 +310,5 @@ class Round(object):
 
         # add signing
         self.__coin.add_transaction_signatures(transaction, signatures)
-        self.__logchan.send("Player # " + str(self.__me) + " complete protocol")
+        self.__logchan.send("Player " + str(self.__me) + " complete protocol")
         return transaction
