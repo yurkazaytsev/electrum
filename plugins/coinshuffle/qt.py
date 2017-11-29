@@ -53,10 +53,10 @@ from electroncash_gui.qt.util import OkButton, WindowModalDialog
 class Plugin(BasePlugin):
 
     def fullname(self):
-        return 'CoinShuffle'
+        return 'CashShuffle'
 
     def description(self):
-        return _("Configure Coinshuffle Protocol")
+        return _("Configure CashShuffle Protocol")
 
     def is_available(self):
         return True
@@ -74,11 +74,11 @@ class Plugin(BasePlugin):
         return EnterButton(_('Settings'), partial(self.settings_dialog, window))
 
     def settings_dialog(self, window):
-        d = WindowModalDialog(window, _("Coinshuffle settings"))
+        d = WindowModalDialog(window, _("CashShuffle settings"))
         d.setMinimumSize(500, 200)
 
         vbox = QVBoxLayout(d)
-        vbox.addWidget(QLabel(_('Coinshuffle server')))
+        vbox.addWidget(QLabel(_('CashShuffle server')))
         grid = QGridLayout()
         vbox.addLayout(grid)
         grid.addWidget(QLabel('server'), 0, 0)

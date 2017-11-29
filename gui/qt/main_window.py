@@ -1560,6 +1560,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def process_protocol_messages(self, message):
         if message[-17:] == "complete protocol":
             self.coinshuffle_start_button.setEnabled(True)
+            self.coinshuffle_inputs.setEnabled(True)
+            self.coinshuffle_changes.setEnabled(True)
+            self.coinshuffle_outputs.setEnabled(True)
+            self.coinshuffle_amount_radio.setEnabled(True)
+            self.coinshuffle_fee.setEnabled(True)
             if self.pThread.tx:
                 self.show_transaction(self.pThread.tx)
                 self.pThread.join()
@@ -1584,12 +1589,20 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         input_address = self.coinshuffle_inputs.get_input_address()
         change_address = self.coinshuffle_changes.get_change_address()
         output_address = self.coinshuffle_outputs.get_output_address()
+        #disable inputs
+        self.coinshuffle_start_button.setEnabled(False)
+        self.coinshuffle_inputs.setEnabled(False)
+        self.coinshuffle_changes.setEnabled(False)
+        self.coinshuffle_outputs.setEnabled(False)
+        self.coinshuffle_amount_radio.setEnabled(False)
+        self.coinshuffle_fee.setEnabled(False)
+
         amount = self.coinshuffle_amount_radio.get_amount()
         fee = self.coinshuffle_fee.get_amount()
         logger =  ConsoleLogger()
         # logger.logUpdater.connect(lambda x: self.coinshuffle_text_output.append(x))
         logger.logUpdater.connect(self.process_protocol_messages)
-        self.coinshuffle_start_button.setEnabled(False)
+        # self.coinshuffle_start_button.setEnabled(False)
         priv_key = self.wallet.get_private_key(input_address, password)
         sk = regenerate_key(priv_key[0])
         # addr_new = self.wallet.create_new_address(False)

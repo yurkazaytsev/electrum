@@ -1,5 +1,5 @@
 from electroncash.i18n import _
 
-fullname = _('CoinShuffle')
-description = _("Coin shuffle protocol")
+fullname = _('CashShuffle')
+description = _("CashShuffle protocol")
 available_for = ['qt']
