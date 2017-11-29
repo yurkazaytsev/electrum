@@ -94,14 +94,15 @@ class Round(object):
         for player in self.__players:
             # address = public_key_to_p2pkh(players[player])
             address = self.__coin.address(self.__players[player])
+            print(address)
             if not self.__coin.sufficient_funds(address,self.__amount + self.__fee):
                 offenders.append(player)
         if len(offenders) == 0:
             return
         else:
             self.__phase = "Blame"
-            for i in offenders:
-                self.__messages.blame_insufficient_funds()
+            for offender in offenders:
+                self.__messages.blame_insufficient_funds(offender)
                 # self.__messages.sign_last_packet(self.__sk)
                 self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
                 self.__outchan.send(self.__messages.packets.SerializeToString())
