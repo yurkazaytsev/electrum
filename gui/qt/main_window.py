@@ -1553,7 +1553,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.coinshufle_input_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
         self.coinshuffle_outputs_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
         self.coinshuffle_inputs.setItmes(self.wallet)
-        self.coinshuffle_changes.setItmes(self.wallet)
+        self.coinshuffle_changes.setItems(self.wallet)
+        self.coinshuffle_outputs.setItems(self.wallet)
         # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
 
     def process_protocol_messages(self, message):
@@ -1582,6 +1583,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             return
         input_address = self.coinshuffle_inputs.get_input_address()
         change_address = self.coinshuffle_changes.get_change_address()
+        output_address = self.coinshuffle_outputs.get_output_address()
         amount = self.coinshuffle_amount_radio.get_amount()
         fee = self.coinshuffle_fee.get_amount()
         logger =  ConsoleLogger()
@@ -1590,8 +1592,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.coinshuffle_start_button.setEnabled(False)
         priv_key = self.wallet.get_private_key(input_address, password)
         sk = regenerate_key(priv_key[0])
-        addr_new = self.wallet.create_new_address(False)
-        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, addr_new, change_address, logger = logger)
+        # addr_new = self.wallet.create_new_address(False)
+        # addr_new = self.coinshuffle_outputs.get_address()
+        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, output_address, change_address, logger = logger)
         # logger.logUpdater.connect(lambda x: self.process_protocol_messages(x, pThread.tx) )
         self.pThread.start()
         # self.pThread.join(10*60) # Ten minutes for the protocol execution
@@ -1617,6 +1620,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         # self.shuffle_list = ShuffleList(self)
         from shuffle import InputAdressWidget
         from shuffle import ChangeAdressWidget
+        from shuffle import OutputAdressWidget
         from shuffle import ConsoleOutput
         from shuffle import AmountSelect
         # from shuffle import start_protocol
@@ -1629,6 +1633,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         #Q ComboBox for adresses
         self.coinshuffle_inputs = InputAdressWidget(decimal_point = self.get_decimal_point)
         self.coinshuffle_changes = ChangeAdressWidget()
+        self.coinshuffle_outputs = OutputAdressWidget()
         self.coinshuffle_amount_radio = AmountSelect(self.coinshuffle_amounts, decimal_point = self.get_decimal_point)
         # self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
         self.coinshuffle_fee = BTCAmountEdit(self.get_decimal_point)
@@ -1661,17 +1666,19 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
         grid.addWidget(QLabel(_('Shuffle input address')), 1, 0)
         grid.addWidget(QLabel(_('Shuffle change address')), 2, 0)
-        grid.addWidget(QLabel(_('Amount')), 3, 0)
-        grid.addWidget(QLabel(_('Fee')), 4, 0)
+        grid.addWidget(QLabel(_('Shuffle output address')), 3, 0)
+        grid.addWidget(QLabel(_('Amount')), 4, 0)
+        grid.addWidget(QLabel(_('Fee')), 5, 0)
         grid.addWidget(self.coinshuffle_inputs,1,1,1,-1)
         grid.addWidget(self.coinshuffle_changes,2,1,1,-1)
-        grid.addWidget(self.coinshuffle_amount_radio,3,1)
+        grid.addWidget(self.coinshuffle_outputs,3,1,1,-1)
+        grid.addWidget(self.coinshuffle_amount_radio,4,1)
         # grid.addWidget(self.coinshuffle_amount,3,1)
         # grid.addWidget(self.coinshuffle_max_button, 3, 2)
         # grid.addWidget(self.coinshuffle_fee_slider, 4, 1)
-        grid.addWidget(self.coinshuffle_fee, 4, 1)
-        grid.addWidget(self.coinshuffle_start_button, 5, 0)
-        grid.addWidget(self.coinshuffle_text_output,6,0,1,-1)
+        grid.addWidget(self.coinshuffle_fee,5, 1)
+        grid.addWidget(self.coinshuffle_start_button, 6, 0)
+        grid.addWidget(self.coinshuffle_text_output,7,0,1,-1)
 
         vbox0 = QVBoxLayout()
         vbox0.addLayout(grid)

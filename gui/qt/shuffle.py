@@ -88,7 +88,6 @@ class InputAdressWidget(QComboBox):
             p = 8
         return str(value * (10**(- p))) + " " + units[p]
 
-
     def clear_addresses(self):
         self.inputsArray = []
         self.clear()
@@ -104,7 +103,22 @@ class InputAdressWidget(QComboBox):
     def get_input_value(self):
         return self.inputsArray[self.currentIndex()]['value']
 
+class OutputAdressWidget(QComboBox):
 
+    def __init__(self, parent = None):
+        QComboBox.__init__(self, parent)
+
+    def clear_addresses(self):
+        self.outputsArray = []
+        self.clear()
+
+    def setItems(self, wallet):
+        self.outputsArray = wallet.get_unused_addresses()
+        for address in self.outputsArray:
+            self.addItem(address)
+
+    def get_output_address(self):
+        return self.outputsArray[self.currentIndex()]
 
 # class ConsoleOutput(QLineEdit):
 #
@@ -146,7 +160,7 @@ class ChangeAdressWidget(QComboBox):
         self.ChangesArray = []
         self.clear()
 
-    def setItmes(self, wallet):
+    def setItems(self, wallet):
         self.ChangesArray = wallet.get_change_addresses()
         self.addItem('Not use change address')
         for addr in self.ChangesArray:
