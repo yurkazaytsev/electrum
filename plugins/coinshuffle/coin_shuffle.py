@@ -7,7 +7,7 @@ class Round(object):
     several failed rounds until they have eliminated malicious players.
     """
 
-    def __init__(self, coin, crypto, messages, inchan, outchan, logchan , session , phase, amount, fee, sk, players, addr_new, change):
+    def __init__(self, coin, crypto, messages, inchan, outchan, logchan , session , phase, amount, fee, sk, pubkey, players, addr_new, change):
 
         self.__coin = coin
         self.__crypto = crypto
@@ -42,7 +42,7 @@ class Round(object):
             raise TypeError('Players should be stored in dict object')
         # My verification public key, which is also my identity.
         # self.__vk = sk.get_public_key(True) # True here means that compression is on
-        self.__vk = sk.get_public_key() # True here means that compression is on
+        self.__vk = pubkey
         # decryption key
         if self.__N == len(set(players.values())):
             if self.__vk in players.values():

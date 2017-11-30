@@ -111,6 +111,7 @@ class protocolThread(threading.Thread):
             self.amount ,
             self.fee,
             self.sk,
+            self.vk,
             self.players,
             self.addr_new,
             self.change)
