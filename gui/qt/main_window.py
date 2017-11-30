@@ -1604,10 +1604,11 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         logger.logUpdater.connect(self.process_protocol_messages)
         # self.coinshuffle_start_button.setEnabled(False)
         priv_key = self.wallet.get_private_key(input_address, password)
+        pub_key = self.wallet.get_public_key(input_address)
         sk = regenerate_key(priv_key[0])
         # addr_new = self.wallet.create_new_address(False)
         # addr_new = self.coinshuffle_outputs.get_address()
-        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, output_address, change_address, logger = logger)
+        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, pub_key, output_address, change_address, logger = logger)
         # logger.logUpdater.connect(lambda x: self.process_protocol_messages(x, pThread.tx) )
         self.pThread.start()
         # self.pThread.join(10*60) # Ten minutes for the protocol execution
