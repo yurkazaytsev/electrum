@@ -288,7 +288,7 @@ class Round(object):
         # self.__logchan.send(str(inputs))
         # (amount, fee, inputs, outputs, changes):
         transaction = self.__coin.make_unsigned_transaction(self.__amount, self.__fee, inputs, self.__new_addresses, self.__change_addresses)
-        signature = self.__coin.get_transaction_signature(transaction, self.__sk)
+        signature = self.__coin.get_transaction_signature(transaction, self.__sk, self.__vk)
         # signature = self.__sk.sign_message(transaction,True)
         self.__messages.clear_packets()
         self.__messages.add_signature(signature)

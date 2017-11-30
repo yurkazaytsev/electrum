@@ -68,8 +68,8 @@ class Coin(object):
         tx.add_outputs(tx_changes)
         return tx
 
-    def get_transaction_signature(self, tx, sk):
-        vk = sk.get_public_key(True)
+    def get_transaction_signature(self, tx, sk, vk):
+        # vk = sk.get_public_key(True)
         txin = filter(lambda x: vk in x['pubkeys'], tx.inputs())
         if txin:
             tx_num = tx.inputs().index(txin[0])
