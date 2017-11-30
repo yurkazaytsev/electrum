@@ -1,8 +1,6 @@
 class BlameException(Exception):
     pass
 
-
-
 class Round(object):
     """
     A single round of the protocol. It is possible that the players may go through
@@ -95,7 +93,7 @@ class Round(object):
             # address = public_key_to_p2pkh(players[player])
             address = self.__coin.address(self.__players[player])
             # TEMPORARY
-            # self.__logchan.send(str(self.__coin.sufficient_funds(address,self.__amount + self.__fee)) + " at "+ address)
+            self.__logchan.send(str(self.__coin.sufficient_funds(address,self.__amount + self.__fee)) + " at "+ address)
             if not self.__coin.sufficient_funds(address,self.__amount + self.__fee):
                 offenders.append(player)
         if len(offenders) == 0:
