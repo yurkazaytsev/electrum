@@ -41,7 +41,8 @@ class Round(object):
         else:
             raise TypeError('Players should be stored in dict object')
         # My verification public key, which is also my identity.
-        self.__vk = sk.get_public_key(True) # True here means that compression is on
+        # self.__vk = sk.get_public_key(True) # True here means that compression is on
+        self.__vk = sk.get_public_key() # True here means that compression is on
         # decryption key
         if self.__N == len(set(players.values())):
             if self.__vk in players.values():
