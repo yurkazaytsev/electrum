@@ -304,10 +304,12 @@ class Round(object):
         for player in self.__players:
             self.__messages.packets.ParseFromString(self.__inbox[phase][self.__players[player]])
             player_signature = self.__messages.get_signature()
+            self.__logchan.send("Player " + str(self.__me) + player_signature)
             signatures[self.__players[player]] = player_signature
             # checks = self.__coin.verify_signature(player_signature, transaction, self.__players[player])
 
         # add signing
         self.__coin.add_transaction_signatures(transaction, signatures)
+        self.__logchan.send('transaction: '+ transaction.raw)
         self.__logchan.send("Player " + str(self.__me) + " complete protocol")
         return transaction
