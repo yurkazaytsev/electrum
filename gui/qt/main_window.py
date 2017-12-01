@@ -1658,6 +1658,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
 
         # self.coinshuffle_amount.textChanged.connect(self.check_sufficient_ammount)
+        self.coinshuffle_inputs.currentIndexChanged.connect(self.check_sufficient_ammount)
         self.coinshuffle_amount_radio.button_group.buttonClicked.connect(self.check_sufficient_ammount)
         self.coinshuffle_fee.textChanged.connect(self.check_sufficient_ammount)
 
@@ -1702,10 +1703,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         vbox = QVBoxLayout(w)
         vbox.addLayout(hbox)
         vbox.addStretch(1)
-        # vbox.addWidget(self.invoices_label)
-        # vbox.addWidget(self.invoice_list)
-        # vbox.setStretchFactor(self.invoice_list, 1000)
-        # w.searchable_list = self.invoice_list
         # run_hook('create_send_tab', grid)
         # self.shuffle_list = l = ShuffleList(self)
         # return self.create_list_tab(l)
@@ -2669,6 +2666,9 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             for edit, amount in zip(edits, amounts):
                 edit.setAmount(amount)
             self.update_status()
+            #
+            self.coinshuffle_inputs.update(self.wallet)
+            self.coinshuffle_amount_radio.update()
         unit_combo.currentIndexChanged.connect(on_unit)
         gui_widgets.append((unit_label, unit_combo))
 

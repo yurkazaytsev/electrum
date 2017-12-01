@@ -93,8 +93,6 @@ class Round(object):
         for player in self.__players:
             # address = public_key_to_p2pkh(players[player])
             address = self.__coin.address(self.__players[player])
-            # TEMPORARY
-            self.__logchan.send(str(self.__coin.sufficient_funds(address,self.__amount + self.__fee)) + " at "+ address)
             if not self.__coin.sufficient_funds(address,self.__amount + self.__fee):
                 offenders.append(player)
         if len(offenders) == 0:
@@ -304,12 +302,10 @@ class Round(object):
         for player in self.__players:
             self.__messages.packets.ParseFromString(self.__inbox[phase][self.__players[player]])
             player_signature = self.__messages.get_signature()
-            self.__logchan.send("Player " + str(self.__me) + player_signature)
             signatures[self.__players[player]] = player_signature
             # checks = self.__coin.verify_signature(player_signature, transaction, self.__players[player])
 
         # add signing
         self.__coin.add_transaction_signatures(transaction, signatures)
-        self.__logchan.send('transaction: '+ transaction.raw)
         self.__logchan.send("Player " + str(self.__me) + " complete protocol")
         return transaction

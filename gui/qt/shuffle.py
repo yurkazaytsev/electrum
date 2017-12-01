@@ -66,6 +66,10 @@ class AmountSelect(QGroupBox):
             self.button_group.addButton(button, i)
         self.setLayout(buttons_layout)
 
+    def update(self):
+        for i, button in enumerate(self.button_group.buttons()):
+            button.setText(self.add_units(self.values[i]))
+
     def add_units(self, value):
         p = self.decimal_point()
         if p not in [2, 5 , 8]:
@@ -88,6 +92,16 @@ class InputAdressWidget(QComboBox):
             p = 8
         return str(value * (10**(- p))) + " " + units[p]
 
+    def update(self, wallet):
+        current_input = self.get_input_address()
+        currentindex = self.currentIndex()
+        self.clear_addresses()
+        self.setItmes(wallet)
+        if current_input in self.inputsArray:
+            self.setCurrentIndex(self.inputsArray.index(current_input))
+        else:
+            self.setCurrentIndex(0)
+
     def clear_addresses(self):
         self.inputsArray = []
         self.clear()
@@ -101,7 +115,11 @@ class InputAdressWidget(QComboBox):
         return self.inputsArray[self.currentIndex()]['address']
 
     def get_input_value(self):
-        return self.inputsArray[self.currentIndex()]['value']
+        i = self.currentIndex()
+        if i >= 0:
+            return self.inputsArray[self.currentIndex()]['value']
+        else:
+            return 0
 
 class OutputAdressWidget(QComboBox):
 
@@ -120,20 +138,6 @@ class OutputAdressWidget(QComboBox):
     def get_output_address(self):
         return self.outputsArray[self.currentIndex()]
 
-# class ConsoleOutput(QLineEdit):
-#
-#     def __init__(self):
-#         QLineEdit.__init__(self)
-#         self.setText('Console output go here')
-#         self.setReadOnly(True)
-#
-#     # this is for using is as a channel
-#     def send(self, message):
-#         self.setText(str(message))
-#
-#     # this is for using is as a channel
-#     def put(self, message):
-#         self.send(message)
 class ConsoleLogger(QObject):
     logUpdater  = pyqtSignal(str)
 
