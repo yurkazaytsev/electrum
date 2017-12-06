@@ -92,6 +92,7 @@ class Coin(object):
         return true
 
     def verify_tx_signature(self, sig, tx, vk):
+        result = False
         # 1. get inputs from tx by vk
         txin = filter(lambda x: vk in x['pubkeys'], tx.inputs())
         # 2. compute prehash from tx inputs
@@ -102,12 +103,14 @@ class Coin(object):
             r, s = ecdsa.util.sigdecode_der(sig.decode('hex')[:-1], order)
             sig_string = ecdsa.util.sigencode_string(r, s, order)
             compressed = len(vk) <= 66
-            pubks = [MyVerifyingKey.from_signature(sig_string, recid, pre_hash, curve = SECP256k1) for recid in range(4)]
-            pubkeys = [point_to_ser(pubk.pubkey.point, compressed).encode('hex') for pubk in pubks]
-            return vk in pubkeys
+            for recid in range(0,4):
+                pubk = MyVerifyingKey.from_signature(sig_string, recid, pre_hash, curve = SECP256k1)
+                pubkey = point_to_ser(pubk.pubkey.point, compressed).encode('hex')
+                if vk == pubkey:
+                    return True
         else:
             return False
-        # 3. verify digest
+        return False
 
 
     def verify_signature(self, sig, message, vk):

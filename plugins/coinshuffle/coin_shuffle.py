@@ -308,8 +308,8 @@ class Round(object):
         inputs = {self.__players[player]:self.__coin.address(self.__players[player])  for player in self.__players}
         # self.__logchan.send(str(inputs))
         # (amount, fee, inputs, outputs, changes):
-        transaction = self.__coin.make_unsigned_transaction(self.__amount, self.__fee, inputs, self.__new_addresses, self.__change_addresses)
-        signature = self.__coin.get_transaction_signature(transaction, self.__sk, self.__vk)
+        self.transaction = self.__coin.make_unsigned_transaction(self.__amount, self.__fee, inputs, self.__new_addresses, self.__change_addresses)
+        signature = self.__coin.get_transaction_signature(self.transaction, self.__sk, self.__vk)
         # signature = self.__sk.sign_message(transaction,True)
         self.__messages.clear_packets()
         self.__messages.add_signature(signature)
@@ -320,13 +320,13 @@ class Round(object):
         while len(self.__inbox[phase]) < self.__N:
             self.inchan_to_inbox()
 
-        signatures = {}
+        self.signatures = {}
         self.__logchan.send("Player " + str(self.__me) + " got transction signatures")
         for player in self.__players:
             self.__messages.packets.ParseFromString(self.__inbox[phase][self.__players[player]])
             player_signature = self.__messages.get_signature()
-            signatures[self.__players[player]] = player_signature
-            check = self.__coin.verify_tx_signature(player_signature, transaction, self.__players[player])
+            self.signatures[self.__players[player]] = player_signature
+            check = self.__coin.verify_tx_signature(player_signature, self.transaction, self.__players[player])
             if not check:
                 self.__messages.clear_packets()
                 self.__messages.blame_wrong_transaction_signature(self.__players[player])
@@ -336,8 +336,8 @@ class Round(object):
                 raise BlameException('Wrong tx signature from player ' + str(player))
 
         # add signing
-        self.__coin.add_transaction_signatures(transaction, signatures)
-        self.tx = transaction
+        self.__coin.add_transaction_signatures(self.transaction, self.signatures)
+        self.tx = self.transaction
         self.__logchan.send("Player " + str(self.__me) + " complete protocol")
         self.done = True
         # return transaction
