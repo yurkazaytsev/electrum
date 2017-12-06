@@ -60,7 +60,7 @@ class protocolThread(threading.Thread):
     def run(self):
         self.commutator.start()
         # self.commutator.connect()
-        self.messages.make_greeting(self.vk)
+        self.messages.make_greeting(self.vk, int(self.amount))
         msg = self.messages.packets.SerializeToString()
         self.income.send(msg)
         req = self.outcome.recv()

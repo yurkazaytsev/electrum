@@ -15,9 +15,10 @@ class Messages(object):
             'Blame':message_factory.BLAME, # Someone has attempted to cheat.
             }
 
-    def make_greeting(self, vk):
+    def make_greeting(self, vk, amount):
         packet = self.packets.packet.add()
         packet.packet.from_key.key = vk
+        packet.packet.registration.amount = amount
 
     def form_last_packet(self, eck, session, number, vk_from , vk_to, phase):
         packet = self.packets.packet[-1]

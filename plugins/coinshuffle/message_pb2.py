@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\rmessage.proto\"@\n\x06Signed\x12\x17\n\x06packet\x18\x01 \x01(\x0b\x32\x07.Packet\x12\x1d\n\tsignature\x18\x02 \x01(\x0b\x32\n.Signature\"\xa1\x01\n\x06Packet\x12\x0f\n\x07session\x18\x01 \x01(\x0c\x12\x0e\n\x06number\x18\x02 \x01(\r\x12\"\n\x08\x66rom_key\x18\x03 \x01(\x0b\x32\x10.VerificationKey\x12 \n\x06to_key\x18\x04 \x01(\x0b\x32\x10.VerificationKey\x12\x15\n\x05phase\x18\x05 \x01(\x0e\x32\x06.Phase\x12\x19\n\x07message\x18\x06 \x01(\x0b\x32\x08.Message\"\xb1\x01\n\x07Message\x12\x19\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x08.Address\x12\x1b\n\x03key\x18\x02 \x01(\x0b\x32\x0e.EncryptionKey\x12\x13\n\x04hash\x18\x03 \x01(\x0b\x32\x05.Hash\x12\x1d\n\tsignature\x18\x04 \x01(\x0b\x32\n.Signature\x12\x0b\n\x03str\x18\x05 \x01(\t\x12\x15\n\x05\x62lame\x18\x06 \x01(\x0b\x32\x06.Blame\x12\x16\n\x04next\x18\x07 \x01(\x0b\x32\x08.Message\"\x1a\n\x07\x41\x64\x64ress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\x1e\n\x0fVerificationKey\x12\x0b\n\x03key\x18\x01 \x01(\t\"\x1c\n\rEncryptionKey\x12\x0b\n\x03key\x18\x01 \x01(\t\",\n\rDecryptionKey\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0e\n\x06public\x18\x02 \x01(\t\"\x14\n\x04Hash\x12\x0c\n\x04hash\x18\x01 \x01(\x0c\"\x1e\n\tSignature\x12\x11\n\tsignature\x18\x01 \x01(\x0c\"\"\n\x0bTransaction\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c\"\xb9\x01\n\x05\x42lame\x12\x17\n\x06reason\x18\x01 \x01(\x0e\x32\x07.Reason\x12!\n\x07\x61\x63\x63used\x18\x02 \x01(\x0b\x32\x10.VerificationKey\x12\x1b\n\x03key\x18\x03 \x01(\x0b\x32\x0e.DecryptionKey\x12!\n\x0btransaction\x18\x04 \x01(\x0b\x32\x0c.Transaction\x12\x19\n\x07invalid\x18\x05 \x01(\x0b\x32\x08.Invalid\x12\x19\n\x07packets\x18\x06 \x01(\x0b\x32\x08.Packets\"\x1a\n\x07Invalid\x12\x0f\n\x07invalid\x18\x01 \x01(\x0c\"\"\n\x07Packets\x12\x17\n\x06packet\x18\x01 \x03(\x0b\x32\x07.Signed*\x90\x01\n\x05Phase\x12\x08\n\x04NONE\x10\x00\x12\x10\n\x0c\x41NNOUNCEMENT\x10\x01\x12\x0b\n\x07SHUFFLE\x10\x02\x12\r\n\tBROADCAST\x10\x03\x12\x16\n\x12\x45QUIVOCATION_CHECK\x10\x04\x12\x0b\n\x07SIGNING\x10\x05\x12\x1f\n\x1bVERIFICATION_AND_SUBMISSION\x10\x06\x12\t\n\x05\x42LAME\x10\x07*\xc6\x01\n\x06Reason\x12\x15\n\x11INSUFFICIENTFUNDS\x10\x00\x12\x0f\n\x0b\x44OUBLESPEND\x10\x01\x12\x17\n\x13\x45QUIVOCATIONFAILURE\x10\x02\x12\x12\n\x0eSHUFFLEFAILURE\x10\x03\x12!\n\x1dSHUFFLEANDEQUIVOCATIONFAILURE\x10\x04\x12\x14\n\x10INVALIDSIGNATURE\x10\x05\x12\x11\n\rMISSINGOUTPUT\x10\x06\x12\x08\n\x04LIAR\x10\x07\x12\x11\n\rINVALIDFORMAT\x10\x08\x42!\n\x18\x63om.shuffle.player.protoB\x05Protob\x06proto3')
+  serialized_pb=_b('\n\rmessage.proto\"@\n\x06Signed\x12\x17\n\x06packet\x18\x01 \x01(\x0b\x32\x07.Packet\x12\x1d\n\tsignature\x18\x02 \x01(\x0b\x32\n.Signature\"\xc6\x01\n\x06Packet\x12\x0f\n\x07session\x18\x01 \x01(\x0c\x12\x0e\n\x06number\x18\x02 \x01(\r\x12\"\n\x08\x66rom_key\x18\x03 \x01(\x0b\x32\x10.VerificationKey\x12 \n\x06to_key\x18\x04 \x01(\x0b\x32\x10.VerificationKey\x12\x15\n\x05phase\x18\x05 \x01(\x0e\x32\x06.Phase\x12\x19\n\x07message\x18\x06 \x01(\x0b\x32\x08.Message\x12#\n\x0cregistration\x18\x07 \x01(\x0b\x32\r.Registration\"\xb1\x01\n\x07Message\x12\x19\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x08.Address\x12\x1b\n\x03key\x18\x02 \x01(\x0b\x32\x0e.EncryptionKey\x12\x13\n\x04hash\x18\x03 \x01(\x0b\x32\x05.Hash\x12\x1d\n\tsignature\x18\x04 \x01(\x0b\x32\n.Signature\x12\x0b\n\x03str\x18\x05 \x01(\t\x12\x15\n\x05\x62lame\x18\x06 \x01(\x0b\x32\x06.Blame\x12\x16\n\x04next\x18\x07 \x01(\x0b\x32\x08.Message\"\x1a\n\x07\x41\x64\x64ress\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"\x1e\n\x0cRegistration\x12\x0e\n\x06\x61mount\x18\x01 \x01(\x04\"\x1e\n\x0fVerificationKey\x12\x0b\n\x03key\x18\x01 \x01(\t\"\x1c\n\rEncryptionKey\x12\x0b\n\x03key\x18\x01 \x01(\t\",\n\rDecryptionKey\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x0e\n\x06public\x18\x02 \x01(\t\"\x14\n\x04Hash\x12\x0c\n\x04hash\x18\x01 \x01(\x0c\"\x1e\n\tSignature\x12\x11\n\tsignature\x18\x01 \x01(\x0c\"\"\n\x0bTransaction\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c\"\xb9\x01\n\x05\x42lame\x12\x17\n\x06reason\x18\x01 \x01(\x0e\x32\x07.Reason\x12!\n\x07\x61\x63\x63used\x18\x02 \x01(\x0b\x32\x10.VerificationKey\x12\x1b\n\x03key\x18\x03 \x01(\x0b\x32\x0e.DecryptionKey\x12!\n\x0btransaction\x18\x04 \x01(\x0b\x32\x0c.Transaction\x12\x19\n\x07invalid\x18\x05 \x01(\x0b\x32\x08.Invalid\x12\x19\n\x07packets\x18\x06 \x01(\x0b\x32\x08.Packets\"\x1a\n\x07Invalid\x12\x0f\n\x07invalid\x18\x01 \x01(\x0c\"\"\n\x07Packets\x12\x17\n\x06packet\x18\x01 \x03(\x0b\x32\x07.Signed*\x90\x01\n\x05Phase\x12\x08\n\x04NONE\x10\x00\x12\x10\n\x0c\x41NNOUNCEMENT\x10\x01\x12\x0b\n\x07SHUFFLE\x10\x02\x12\r\n\tBROADCAST\x10\x03\x12\x16\n\x12\x45QUIVOCATION_CHECK\x10\x04\x12\x0b\n\x07SIGNING\x10\x05\x12\x1f\n\x1bVERIFICATION_AND_SUBMISSION\x10\x06\x12\t\n\x05\x42LAME\x10\x07*\xc6\x01\n\x06Reason\x12\x15\n\x11INSUFFICIENTFUNDS\x10\x00\x12\x0f\n\x0b\x44OUBLESPEND\x10\x01\x12\x17\n\x13\x45QUIVOCATIONFAILURE\x10\x02\x12\x12\n\x0eSHUFFLEFAILURE\x10\x03\x12!\n\x1dSHUFFLEANDEQUIVOCATIONFAILURE\x10\x04\x12\x14\n\x10INVALIDSIGNATURE\x10\x05\x12\x11\n\rMISSINGOUTPUT\x10\x06\x12\x08\n\x04LIAR\x10\x07\x12\x11\n\rINVALIDFORMAT\x10\x08\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -65,8 +65,8 @@ _PHASE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=906,
-  serialized_end=1050,
+  serialized_start=975,
+  serialized_end=1119,
 )
 _sym_db.RegisterEnumDescriptor(_PHASE)
 
@@ -116,8 +116,8 @@ _REASON = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1053,
-  serialized_end=1251,
+  serialized_start=1122,
+  serialized_end=1320,
 )
 _sym_db.RegisterEnumDescriptor(_REASON)
 
@@ -229,6 +229,13 @@ _PACKET = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='registration', full_name='Packet.registration', index=6,
+      number=7, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -242,7 +249,7 @@ _PACKET = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=84,
-  serialized_end=245,
+  serialized_end=282,
 )
 
 
@@ -314,8 +321,8 @@ _MESSAGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=248,
-  serialized_end=425,
+  serialized_start=285,
+  serialized_end=462,
 )
 
 
@@ -345,8 +352,39 @@ _ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=427,
-  serialized_end=453,
+  serialized_start=464,
+  serialized_end=490,
+)
+
+
+_REGISTRATION = _descriptor.Descriptor(
+  name='Registration',
+  full_name='Registration',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='amount', full_name='Registration.amount', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=492,
+  serialized_end=522,
 )
 
 
@@ -376,8 +414,8 @@ _VERIFICATIONKEY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=455,
-  serialized_end=485,
+  serialized_start=524,
+  serialized_end=554,
 )
 
 
@@ -407,8 +445,8 @@ _ENCRYPTIONKEY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=487,
-  serialized_end=515,
+  serialized_start=556,
+  serialized_end=584,
 )
 
 
@@ -445,8 +483,8 @@ _DECRYPTIONKEY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=517,
-  serialized_end=561,
+  serialized_start=586,
+  serialized_end=630,
 )
 
 
@@ -476,8 +514,8 @@ _HASH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=563,
-  serialized_end=583,
+  serialized_start=632,
+  serialized_end=652,
 )
 
 
@@ -507,8 +545,8 @@ _SIGNATURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=585,
-  serialized_end=615,
+  serialized_start=654,
+  serialized_end=684,
 )
 
 
@@ -538,8 +576,8 @@ _TRANSACTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=617,
-  serialized_end=651,
+  serialized_start=686,
+  serialized_end=720,
 )
 
 
@@ -604,8 +642,8 @@ _BLAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=654,
-  serialized_end=839,
+  serialized_start=723,
+  serialized_end=908,
 )
 
 
@@ -635,8 +673,8 @@ _INVALID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=841,
-  serialized_end=867,
+  serialized_start=910,
+  serialized_end=936,
 )
 
 
@@ -666,8 +704,8 @@ _PACKETS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=869,
-  serialized_end=903,
+  serialized_start=938,
+  serialized_end=972,
 )
 
 _SIGNED.fields_by_name['packet'].message_type = _PACKET
@@ -676,6 +714,7 @@ _PACKET.fields_by_name['from_key'].message_type = _VERIFICATIONKEY
 _PACKET.fields_by_name['to_key'].message_type = _VERIFICATIONKEY
 _PACKET.fields_by_name['phase'].enum_type = _PHASE
 _PACKET.fields_by_name['message'].message_type = _MESSAGE
+_PACKET.fields_by_name['registration'].message_type = _REGISTRATION
 _MESSAGE.fields_by_name['address'].message_type = _ADDRESS
 _MESSAGE.fields_by_name['key'].message_type = _ENCRYPTIONKEY
 _MESSAGE.fields_by_name['hash'].message_type = _HASH
@@ -693,6 +732,7 @@ DESCRIPTOR.message_types_by_name['Signed'] = _SIGNED
 DESCRIPTOR.message_types_by_name['Packet'] = _PACKET
 DESCRIPTOR.message_types_by_name['Message'] = _MESSAGE
 DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
+DESCRIPTOR.message_types_by_name['Registration'] = _REGISTRATION
 DESCRIPTOR.message_types_by_name['VerificationKey'] = _VERIFICATIONKEY
 DESCRIPTOR.message_types_by_name['EncryptionKey'] = _ENCRYPTIONKEY
 DESCRIPTOR.message_types_by_name['DecryptionKey'] = _DECRYPTIONKEY
@@ -732,6 +772,13 @@ Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,
   # @@protoc_insertion_point(class_scope:Address)
   ))
 _sym_db.RegisterMessage(Address)
+
+Registration = _reflection.GeneratedProtocolMessageType('Registration', (_message.Message,), dict(
+  DESCRIPTOR = _REGISTRATION,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:Registration)
+  ))
+_sym_db.RegisterMessage(Registration)
 
 VerificationKey = _reflection.GeneratedProtocolMessageType('VerificationKey', (_message.Message,), dict(
   DESCRIPTOR = _VERIFICATIONKEY,
@@ -797,6 +844,4 @@ Packets = _reflection.GeneratedProtocolMessageType('Packets', (_message.Message,
 _sym_db.RegisterMessage(Packets)
 
 
-DESCRIPTOR.has_options = True
-DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\030com.shuffle.player.protoB\005Proto'))
 # @@protoc_insertion_point(module_scope)
