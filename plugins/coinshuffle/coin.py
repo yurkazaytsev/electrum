@@ -92,7 +92,7 @@ class Coin(object):
         return true
 
     def verify_tx_signature(self, sig, tx, vk):
-        result = False
+        # result = False
         # 1. get inputs from tx by vk
         txin = filter(lambda x: vk in x['pubkeys'], tx.inputs())
         # 2. compute prehash from tx inputs
@@ -110,7 +110,7 @@ class Coin(object):
                     return True
         else:
             return False
-        return False
+        # return False
 
 
     def verify_signature(self, sig, message, vk):
