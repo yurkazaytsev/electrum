@@ -1,5 +1,5 @@
 from electroncash.bitcoin import (
-    MySigningKey, SECP256k1, is_address,
+    MySigningKey, MyVerifyingKey ,SECP256k1, is_address,
     generator_secp256k1, point_to_ser, public_key_to_p2pkh, EC_KEY,
     bip32_root, bip32_public_derivation, bip32_private_derivation, pw_encode,
     pw_decode, Hash, public_key_from_private_key, address_from_private_key,
@@ -90,6 +90,25 @@ class Coin(object):
     def check_double_spend(t):
         "Double Spend Check should go here"
         return true
+
+    def verify_tx_signature(self, sig, tx, vk):
+        # 1. get inputs from tx by vk
+        txin = filter(lambda x: vk in x['pubkeys'], tx.inputs())
+        # 2. compute prehash from tx inputs
+        if txin:
+            tx_num = tx.inputs().index(txin[0])
+            pre_hash = Hash(tx.serialize_preimage(tx_num).decode('hex'))
+            order = generator_secp256k1.order()
+            r, s = ecdsa.util.sigdecode_der(sig.decode('hex')[:-1], order)
+            sig_string = ecdsa.util.sigencode_string(r, s, order)
+            compressed = len(vk) <= 66
+            pubks = [MyVerifyingKey.from_signature(sig_string, recid, pre_hash, curve = SECP256k1) for recid in range(4)]
+            pubkeys = [point_to_ser(pubk.pubkey.point, compressed).encode('hex') for pubk in pubks]
+            return vk in pubkeys
+        else:
+            return False
+        # 3. verify digest
+
 
     def verify_signature(self, sig, message, vk):
         pk, compressed = pubkey_from_signature(sig,Hash(msg_magic(message)))

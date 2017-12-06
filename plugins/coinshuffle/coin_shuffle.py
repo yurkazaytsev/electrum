@@ -62,6 +62,8 @@ class Round(object):
         self.__signatures = dict()
         self.__inbox = {self.__messages.phases[phase]:{} for phase in self.__messages.phases}
         self.__debug = False
+        self.tx = None
+        self.done = None
 
     def inchan_to_inbox(self):
         """
@@ -71,7 +73,6 @@ class Round(object):
             3. store the packets from message to inbox[phase][from_key]
         Then methods reads from inbox not from inchan. I need it to cathc the message from "future"
         """
-        # val = self.__inchan.recv()
         try:
             val = self.__inchan.recv()
             self.__messages.packets.ParseFromString(val)
@@ -82,9 +83,19 @@ class Round(object):
         self.__inbox[phase][from_key] = val
         for sig, msg, player in self.__messages.get_signatures_and_packets():
             if not self.__coin.verify_signature(sig, msg, player):
+                self.__messages.clear_packets()
+                self.__messages.blame_invalid_signature(self.__players[player])
+                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+                self.__logchan.send('Blame: player ' + player + ' message with wrong signature!')
                 raise BlameException('Player ' + player + ' message with wrong signature!')
-        # blame = self.__messages.get_blame()
-        # if blame
+        # blames = self.__messages.get_blame()
+        if phase == 7: # Normal alias should go here
+            self.__logchan.send('Blame: got Blame message from another player')
+            raise BlameException('Exit by Blame')
+        # if blames:
+        #     print('I recieve the blame actually')
+        #     self.__logchan.send("Blame on you!")
         if self.__debug:
             self.__logchan.send("Player " + str(self.__me)+"\n"+str(self.__inbox))
 
@@ -94,16 +105,17 @@ class Round(object):
             # address = public_key_to_p2pkh(players[player])
             address = self.__coin.address(self.__players[player])
             if not self.__coin.sufficient_funds(address,self.__amount + self.__fee):
-                offenders.append(player)
+                offenders.append(self.__players[player])
         if len(offenders) == 0:
             return
         else:
             self.__phase = "Blame"
             for offender in offenders:
                 self.__messages.blame_insufficient_funds(offender)
-                # self.__messages.sign_last_packet(self.__sk)
                 self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
                 self.__outchan.send(self.__messages.packets.SerializeToString())
+                #log the Exception
+                self.__logchan.send('Blame: insufficient funds of player ' + str(self.__players.keys()[self.__players.values().index(offender)]))
             raise BlameException('Insufficient funds')
 
     def broadcast_new_key(self):
@@ -131,8 +143,11 @@ class Round(object):
 
         if (len(self.__encryption_keys) == self.__N):
             self.__logchan.send('Player '+ str(self.__me) + ' recieved all keys for test.')
-        else:
-            raise BlameException("Player " + str(self.__me) + " not get all encryption keys")
+        # else:
+        #     self.__phase = "Blame"
+        #     self.__messages.clear_packets()
+        #     self.__logchan.send("Blame: player " + str(self.__me) + " not get all encryption keys")
+        #     raise BlameException("Player " + str(self.__me) + " not get all encryption keys")
 
 
     def encrypt_new_address(self):
@@ -164,8 +179,12 @@ class Round(object):
             self.__messages.packets.ParseFromString(messages[player])
             hash_value = self.__messages.get_hash()
             if hash_value != computed_hash:
-                self.__logchan.send('  someone cheating!')
-                raise BlameException('Chetar!!!')
+                self.__messages.clear_packets()
+                self.__messages.blame_equivocation_failure(self.__players[player])
+                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+                self.__logchan.send('Blame: wrong hash computed by player' + str(player))
+                raise BlameException('Wrong hash computed by player ' + str(player))
         self.__logchan.send('Player ' + str(self.__me) + ' is checked the hashed.')
 
     def protocol_definition(self):
@@ -265,8 +284,12 @@ class Round(object):
             if self.__addr_new in self.__new_addresses:
                 self.__logchan.send("Player "+ str(self.__me) + " receive addresses and found itsefs")
             else:
-                self.__logchan.send("Player " + str(self.__me) + "  not found itsefs new address")
-                raise BlameException
+                self.__messages.clear_packets()
+                self.__messages.blame_missing_output(self.__vk)
+                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+                self.__logchan.send("Blame: player " + str(self.__me) + "  not found itsefs new address")
+                raise BlameException("Blame: player " + str(self.__me) + "  not found itsefs new address")
         except BlameException:
             self.__logchan.send("Blame!")
         # Phase 4: equivocation check.
@@ -303,9 +326,18 @@ class Round(object):
             self.__messages.packets.ParseFromString(self.__inbox[phase][self.__players[player]])
             player_signature = self.__messages.get_signature()
             signatures[self.__players[player]] = player_signature
-            # checks = self.__coin.verify_signature(player_signature, transaction, self.__players[player])
+            check = self.__coin.verify_tx_signature(player_signature, transaction, self.__players[player])
+            if not check:
+                self.__messages.clear_packets()
+                self.__messages.blame_wrong_transaction_signature(self.__players[player])
+                self.__messages.form_last_packet(self.__sk, self.__session, self.__me, self.__vk, None,self.__phase)
+                self.__outchan.send(self.__messages.packets.SerializeToString())
+                self.__logchan.send('Blame: wrong transaction signature from player ' + str(player))
+                raise BlameException('Wrong tx signature from player ' + str(player))
 
         # add signing
         self.__coin.add_transaction_signatures(transaction, signatures)
+        self.tx = transaction
         self.__logchan.send("Player " + str(self.__me) + " complete protocol")
-        return transaction
+        self.done = True
+        # return transaction

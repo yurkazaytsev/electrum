@@ -53,6 +53,9 @@ class protocolThread(threading.Thread):
         self.commutator.connect(host, port)
         self.network = network
         self.tx = None
+        self.executionThread = None
+        self.protocol = None
+        self.time_to_die = False
 
     def run(self):
         self.commutator.start()
@@ -67,7 +70,7 @@ class protocolThread(threading.Thread):
         self.number = self.messages.packets.packet[-1].packet.number
         if self.session != '':
              # print("Player #"  + str(self.number)+" get session number.\n")
-             self.logger.send("Player #"  + str(self.number)+" get session number.\n")
+             self.logger.send("Player "  + str(self.number)+" get session number.\n")
         # # Here is when announcment should begin
         req = self.outcome.recv()
         self.messages.packets.ParseFromString(req)
@@ -75,7 +78,7 @@ class protocolThread(threading.Thread):
         number = self.messages.get_number()
         if phase == 1 and number > 0:
             # print("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
-            self.logger.send("player #" + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
+            self.logger.send("Player " + str(self.number) + " is about to share verification key with " + str(number) +" players.\n")
             self.number_of_players = number
             #Share the keys
             self.messages.clear_packets()
@@ -91,7 +94,7 @@ class protocolThread(threading.Thread):
             self.messages.packets.ParseFromString(messages)
             self.players = {packet.packet.number:str(packet.packet.from_key.key) for packet in self.messages.packets.packet}
         if self.players:
-            self.logger.send('player #' +str(self.number)+ " get " + str(len(self.players))+".\n")
+            self.logger.send('Player ' +str(self.number)+ " get " + str(len(self.players))+".\n")
         #
         coin = Coin(self.network)
         crypto = Crypto()
@@ -99,7 +102,7 @@ class protocolThread(threading.Thread):
         # log_chan = fakeLogChannel()
         begin_phase = Phase('Announcement')
         # Make Round
-        protocol = Round(
+        self.protocol = Round(
             coin,
             crypto,
             self.messages,
@@ -115,6 +118,16 @@ class protocolThread(threading.Thread):
             self.players,
             self.addr_new,
             self.change)
-        self.tx = protocol.protocol_definition()
-        # time.sleep(60)
+        # Trying thread instaed of bare run
+        self.executionThread = threading.Thread(target = self.protocol.protocol_definition)
+        self.executionThread.start()
+        while not self.protocol.done and not self.time_to_die and self.executionThread.is_alive():
+            time.sleep(0.1)
         self.commutator.join()
+
+    def join(self, timeout = None):
+        if self.executionThread:
+            self.time_to_die = True
+            time.sleep(0.2)
+        self.commutator.join()
+        threading.Thread.join(self, timeout)

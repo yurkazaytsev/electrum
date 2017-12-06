@@ -1556,22 +1556,35 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.coinshuffle_changes.setItems(self.wallet)
         self.coinshuffle_outputs.setItems(self.wallet)
         # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
+    def enable_coinshuffle_settings(self):
+        self.coinshuffle_start_button.setEnabled(True)
+        self.coinshuffle_inputs.setEnabled(True)
+        self.coinshuffle_changes.setEnabled(True)
+        self.coinshuffle_outputs.setEnabled(True)
+        self.coinshuffle_amount_radio.setEnabled(True)
+        self.coinshuffle_fee.setEnabled(True)
 
     def process_protocol_messages(self, message):
         if message[-17:] == "complete protocol":
-            self.coinshuffle_start_button.setEnabled(True)
-            self.coinshuffle_inputs.setEnabled(True)
-            self.coinshuffle_changes.setEnabled(True)
-            self.coinshuffle_outputs.setEnabled(True)
-            self.coinshuffle_amount_radio.setEnabled(True)
-            self.coinshuffle_fee.setEnabled(True)
-            if self.pThread.tx:
-                self.show_transaction(self.pThread.tx)
+            tx = self.pThread.protocol.tx
+            if tx:
+                self.show_transaction(tx)
                 self.pThread.join()
-                # self.coinshuffle_text_output.clear()
-                # self.coinshuffle_text_output.setText(tx.raw)
+            else:
+                print("No tx: " + str(tx.raw))
+            self.enable_coinshuffle_settings()
+            self.coinshuffle_inputs.update(self.wallet)
         else:
+            header = message[:6]
+            if header == 'Player':
+                self.coinshuffle_text_output.setTextColor(QColor('green'))
+            if header[:5] == 'Blame':
+                self.coinshuffle_text_output.setTextColor(QColor('red'))
+                self.pThread.join()
+                self.enable_coinshuffle_settings()
+                self.coinshuffle_text_output.append(str(self.pThread.isAlive()))
             self.coinshuffle_text_output.append(message)
+            self.coinshuffle_text_output.setTextColor(QColor('black'))
 
     @protected
     # def start_coinshuffle_protocol(self, input_address, change_address, amount, fee, password, logger = None):
@@ -1609,7 +1622,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         # addr_new = self.wallet.create_new_address(False)
         # addr_new = self.coinshuffle_outputs.get_address()
         self.pThread = protocolThread(server, port, self.network, amount, fee, sk, pub_key, output_address, change_address, logger = logger)
-        # logger.logUpdater.connect(lambda x: self.process_protocol_messages(x, pThread.tx) )
         self.pThread.start()
         # self.pThread.join(10*60) # Ten minutes for the protocol execution
         # if pThread.tx:

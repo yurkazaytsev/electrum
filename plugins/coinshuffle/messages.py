@@ -47,19 +47,52 @@ class Messages(object):
             msg = packet.packet.SerializeToString()
             packet.signature.signature = eck.sign_message(msg,True)
 
-    def blame_insufficient_funds(self, offender):
+    def general_blame(self, reason,  accused):
         """
-        offender is a veryfikation key! of player who have insufficient funds
+        accused is a veryfikation key! of player who accused the Blame
+        reason is a reason why
         """
         # add new packet
         packet = self.packets.packet.add()
         # set blame resaon
-        packet.packet.message.blame.reason = message_factory.INSUFFICIENTFUNDS
+        if reason in range(9): # Better to place evident reason states here
+            packet.packet.message.blame.reason = reason
         # set blame acused
-        packet.packet.message.blame.accused.key = offender
+        packet.packet.message.blame.accused.key = accused
         # set phase (it is 'Blame' here, for real ;) )
         packet.packet.phase = message_factory.BLAME
         # we return nothing here. Message_factory is a state machine, We just update state
+
+
+    def blame_insufficient_funds(self, offender):
+        """
+        offender is a veryfikation key! of player who have insufficient funds
+        """
+        self.general_blame(message_factory.INSUFFICIENTFUNDS, offender)
+
+    def blame_equivocation_failure(self, accused):
+        """
+        accused - is verification key of player with hash mismathc
+        """
+        self.general_blame(message_factory.EQUIVOCATIONFAILURE, accused)
+
+    def blame_missing_output(self, accused):
+        """
+        accused - is verification key of player who haven't find his address
+        """
+        self.general_blame(message_factory.MISSINGOUTPUT, accused)
+
+    def blame_invalid_signature(self, accused):
+        """
+        accused - is verification key of player whos signature have failed
+        """
+        self.general_blame(message_factory.INVALIDSIGNATURE, accused)
+
+    def blame_wrong_transaction_signature(self, accused):
+        """
+        accused - is verification key of player with wrong signature
+        """
+        self.general_blame(message_factory.INVALIDSIGNATURE, accused)
 
     def add_encryption_key(self, ek, change):
         """
@@ -141,7 +174,9 @@ class Messages(object):
         return {packet.packet.number : str(packet.packet.from_key.key) for packet in self.packets.packet}
 
     def get_blame(self):
-        return [packet.packet.message.blame for packet in self.packets.packet]
+        # return filter(lambda b: b.reason is not 0 ,[packet.packet.message.blame for packet in self.packets.packet])
+        return [packet.packet.message for packet in self.packets.packet]
+
 
     def clear_packets(self):
         self.__init__()
