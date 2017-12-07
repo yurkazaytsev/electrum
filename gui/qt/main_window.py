@@ -94,7 +94,6 @@ from electroncash.paymentrequest import PR_UNPAID, PR_PAID, PR_UNKNOWN, PR_EXPIR
 
 class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
-
     def __init__(self, gui_object, wallet):
         QMainWindow.__init__(self)
 
@@ -130,7 +129,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.receive_tab = self.create_receive_tab()
         self.addresses_tab = self.create_addresses_tab()
         self.utxo_tab = self.create_utxo_tab()
-        self.shuffle_tab = self.create_shuffle_tab()
         self.console_tab = self.create_console_tab()
         self.contacts_tab = self.create_contacts_tab()
         tabs.addTab(self.create_history_tab(), QIcon(":icons/tab_history.png"), _('History'))
@@ -147,7 +145,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
         add_optional_tab(tabs, self.addresses_tab, QIcon(":icons/tab_addresses.png"), _("&Addresses"), "addresses")
         add_optional_tab(tabs, self.utxo_tab, QIcon(":icons/tab_coins.png"), _("Co&ins"), "utxo")
-        add_optional_tab(tabs, self.shuffle_tab, QIcon(":icons/tab_coins.png"), _("Shuffle"), "shuffle")
         add_optional_tab(tabs, self.contacts_tab, QIcon(":icons/tab_contacts.png"), _("Con&tacts"), "contacts")
         add_optional_tab(tabs, self.console_tab, QIcon(":icons/tab_console.png"), _("Con&sole"), "console")
 
@@ -171,12 +168,12 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             QShortcut(QKeySequence("Alt+" + str(i + 1)), self, lambda i=i: wrtabs.setCurrentIndex(i))
 
         self.connect(self, QtCore.SIGNAL('payment_request_ok'), self.payment_request_ok)
-	self.connect(self, QtCore.SIGNAL('payment_request_error'), self.payment_request_error)
-	self.history_list.setFocus(True)
+        self.connect(self, QtCore.SIGNAL('payment_request_error'), self.payment_request_error)
+        self.history_list.setFocus(True)
 
         # network callbacks
         if self.network:
-            self.connect(self,QtCore.SIGNAL('network'), self.on_network_qt)
+            self.connect(self, QtCore.SIGNAL('network'), self.on_network_qt)
             interests = ['updated', 'new_transaction', 'status',
                          'banner', 'verified', 'fee']
             # To avoid leaking references to "self" that prevent the
@@ -287,7 +284,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         else:
             self.print_error("unexpected network message:", event, args)
 
-    def on_network_qt(self, event, args=None):
+    def on_network_qt(self, event, *args):
         # Handle a network message in the GUI thread
         if event == 'status':
             self.update_status()
@@ -325,7 +322,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.history_list.update()
         self.address_list.update()
         self.utxo_list.update()
-        # self.shuffle_list.update()
         self.need_update.set()
         # Once GUI has been initialized check if we want to announce something since the callback has been called before the GUI was initialized
         self.notify_transactions()
@@ -337,7 +333,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.update_console()
         self.clear_receive_tab()
         self.request_list.update()
-        self.set_coinshuffle_addrs()
         self.tabs.show()
         self.init_geometry()
         if self.config.get('hide_gui') and self.gui_object.tray.isVisible():
@@ -382,7 +377,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def open_wallet(self):
         wallet_folder = self.get_wallet_folder()
-        filename = unicode(QFileDialog.getOpenFileName(self, "Select your wallet file", wallet_folder))
+        filename = QFileDialog.getOpenFileName(self, "Select your wallet file", wallet_folder)
         if not filename:
             return
         self.gui_object.new_window(str(filename))
@@ -391,7 +386,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     def backup_wallet(self):
         path = self.wallet.storage.path
         wallet_folder = os.path.dirname(path)
-        filename = unicode (QFileDialog.getSaveFileName(self, _('Enter a filename for the copy of your wallet'), wallet_folder))
+        filename = QFileDialog.getSaveFileName(self, _('Enter a filename for the copy of your wallet'), wallet_folder)
         if not filename:
             return
 
@@ -404,7 +399,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 self.show_critical(_("Electrum was unable to copy your wallet file to the specified location.") + "\n" + str(reason), title=_("Unable to create backup"))
 
     def update_recently_visited(self, filename):
-	filename = filename.decode('utf-8')
+	filename=filename.decode('utf-8')
         recent = self.config.get('recently_open', [])
         try:
             sorted(recent)
@@ -486,7 +481,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         view_menu = menubar.addMenu(_("&View"))
         add_toggle_action(view_menu, self.addresses_tab)
         add_toggle_action(view_menu, self.utxo_tab)
-        add_toggle_action(view_menu, self.shuffle_tab)
         add_toggle_action(view_menu, self.contacts_tab)
         add_toggle_action(view_menu, self.console_tab)
 
@@ -515,7 +509,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         help_menu.addAction(_("&About"), self.show_about)
         help_menu.addAction(_("&Official website"), lambda: webbrowser.open("http://electroncash.org"))
         help_menu.addSeparator()
-        help_menu.addAction(_("Documentation"), lambda: webbrowser.open("http://electroncash.readthedocs.io/")).setShortcut(QKeySequence.HelpContents)
+        help_menu.addAction(_("&Documentation"), lambda: webbrowser.open("http://electroncash.readthedocs.io/")).setShortcut(QKeySequence.HelpContents)
         help_menu.addAction(_("&Report Bug"), self.show_report_bug)
         help_menu.addSeparator()
         help_menu.addAction(_("&Donate to server"), self.donate_to_server)
@@ -578,15 +572,15 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
     # custom wrappers for getOpenFileName and getSaveFileName, that remember the path selected by the user
     def getOpenFileName(self, title, filter = ""):
         directory = self.config.get('io_dir', unicode(os.path.expanduser('~')))
-        fileName = unicode(QFileDialog.getOpenFileName(self, title, directory, filter))
+        fileName = QFileDialog.getOpenFileName(self, title, directory, filter)
         if fileName and directory != os.path.dirname(fileName):
             self.config.set_key('io_dir', os.path.dirname(fileName), True)
         return str(fileName)
 
     def getSaveFileName(self, title, filename, filter = ""):
-        directory = self.config.get('io_dir', unicode(os.path.expanduser('~')))
+        directory = self.config.get('io_dir', unicode (os.path.expanduser('~')))
         path = os.path.join( directory, filename )
-        fileName = unicode(QFileDialog.getSaveFileName(self, title, path, filter))
+        fileName = QFileDialog.getSaveFileName(self, title, path, filter)
         if fileName and directory != os.path.dirname(fileName):
             self.config.set_key('io_dir', os.path.dirname(fileName), True)
         return str(fileName)
@@ -721,7 +715,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.request_list.update()
         self.address_list.update()
         self.utxo_list.update()
-        # self.shuffle_list.update()
         self.contact_list.update()
         self.invoice_list.update()
         self.update_completions()
@@ -1253,7 +1246,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         if self.payment_request and self.payment_request.has_expired():
             self.show_error(_('Payment request has expired'))
             return
-        label = unicode( self.message_e.text())
+        label = unicode(self.message_e.text())
 
         if self.payment_request:
             outputs = self.payment_request.get_outputs()
@@ -1524,7 +1517,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.set_frozen_state(addrs, freeze)
         self.address_list.update()
         self.utxo_list.update()
-        # self.shuffle_list.update()
         self.update_fee()
 
     def create_list_tab(self, l):
@@ -1548,182 +1540,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         from utxo_list import UTXOList
         self.utxo_list = l = UTXOList(self)
         return self.create_list_tab(l)
-
-    def set_coinshuffle_addrs(self):
-        self.coinshufle_input_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
-        self.coinshuffle_outputs_addrs = map(lambda x: x.get('address'),self.wallet.get_utxos())
-        self.coinshuffle_inputs.setItmes(self.wallet)
-        self.coinshuffle_changes.setItems(self.wallet)
-        self.coinshuffle_outputs.setItems(self.wallet)
-        # print(map(lambda x: x.get('address'),self.wallet.get_utxos()) )
-    def enable_coinshuffle_settings(self):
-        self.coinshuffle_start_button.setEnabled(True)
-        self.coinshuffle_inputs.setEnabled(True)
-        self.coinshuffle_changes.setEnabled(True)
-        self.coinshuffle_outputs.setEnabled(True)
-        self.coinshuffle_amount_radio.setEnabled(True)
-        # self.coinshuffle_fee.setEnabled(True)
-
-    def process_protocol_messages(self, message):
-        if message[-17:] == "complete protocol":
-            tx = self.pThread.protocol.tx
-            if tx:
-                self.show_transaction(tx)
-                self.pThread.join()
-            else:
-                print("No tx: " + str(tx.raw))
-            self.enable_coinshuffle_settings()
-            self.coinshuffle_inputs.update(self.wallet)
-        else:
-            header = message[:6]
-            if header == 'Player':
-                self.coinshuffle_text_output.setTextColor(QColor('green'))
-            if header[:5] == 'Blame':
-                self.coinshuffle_text_output.setTextColor(QColor('red'))
-                self.pThread.join()
-                self.enable_coinshuffle_settings()
-                self.coinshuffle_text_output.append(str(self.pThread.isAlive()))
-            self.coinshuffle_text_output.append(message)
-            self.coinshuffle_text_output.setTextColor(QColor('black'))
-
-    @protected
-    # def start_coinshuffle_protocol(self, input_address, change_address, amount, fee, password, logger = None):
-    def start_coinshuffle_protocol(self, password):
-        from electroncash_plugins.coinshuffle.client import protocolThread
-        from electroncash.bitcoin import regenerate_key
-        from shuffle import ConsoleLogger
-        try:
-            server_params = self.config.get('coinshuffleserver').split(":")
-            server = server_params[0]
-            port = int(server_params[1])
-        except:
-            self.coinshuffle_text_output.setText('Wrong server connection string')
-            return
-        input_address = self.coinshuffle_inputs.get_input_address()
-        change_address = self.coinshuffle_changes.get_change_address()
-        output_address = self.coinshuffle_outputs.get_output_address()
-        #disable inputs
-        self.coinshuffle_start_button.setEnabled(False)
-        self.coinshuffle_inputs.setEnabled(False)
-        self.coinshuffle_changes.setEnabled(False)
-        self.coinshuffle_outputs.setEnabled(False)
-        self.coinshuffle_amount_radio.setEnabled(False)
-        # self.coinshuffle_fee.setEnabled(False)
-
-        amount = self.coinshuffle_amount_radio.get_amount()
-        fee = self.coinshuffle_fee_constant
-        # fee = self.coinshuffle_fee.get_amount()
-        logger =  ConsoleLogger()
-        # logger.logUpdater.connect(lambda x: self.coinshuffle_text_output.append(x))
-        logger.logUpdater.connect(self.process_protocol_messages)
-        # self.coinshuffle_start_button.setEnabled(False)
-        priv_key = self.wallet.get_private_key(input_address, password)
-        pub_key = self.wallet.get_public_key(input_address)
-        sk = regenerate_key(priv_key[0])
-        # addr_new = self.wallet.create_new_address(False)
-        # addr_new = self.coinshuffle_outputs.get_address()
-        self.pThread = protocolThread(server, port, self.network, amount, fee, sk, pub_key, output_address, change_address, logger = logger)
-        self.pThread.start()
-        # self.pThread.join(10*60) # Ten minutes for the protocol execution
-        # if pThread.tx:
-        #     self.coinshuffle_text_output.clear()
-        #     self.coinshuffle_text_output.setText(pThread.tx.raw)
-
-    def check_sufficient_ammount(self):
-        coin_amount = self.coinshuffle_inputs.get_input_value()
-        shuffle_amount = self.coinshuffle_amount_radio.get_amount()
-        # fee = self.coinshuffle_fee.get_amount()
-        fee = self.coinshuffle_fee_constant
-        if shuffle_amount and fee:
-            if coin_amount > (fee + shuffle_amount):
-                self.coinshuffle_start_button.setEnabled(True)
-            else:
-                self.coinshuffle_start_button.setEnabled(False)
-        else:
-            self.coinshuffle_start_button.setEnabled(False)
-        # self.coinshuffle_text_output.setText(self.config.get('coinshuffleserver'))
-
-    def create_shuffle_tab(self):
-        self.coinshuffle_fee_constant = 1000
-        # from shuffle import ShuffleList
-        # self.shuffle_list = ShuffleList(self)
-        from shuffle import InputAdressWidget
-        from shuffle import ChangeAdressWidget
-        from shuffle import OutputAdressWidget
-        from shuffle import ConsoleOutput
-        from shuffle import AmountSelect
-        # from shuffle import start_protocol
-
-        self.coinshuffle_amounts = [1e4, 1e3]
-        self.shuffle_grid = grid = QGridLayout()
-        grid.setSpacing(8)
-        grid.setColumnStretch(3, 1)
-
-        #Q ComboBox for adresses
-        self.coinshuffle_inputs = InputAdressWidget(decimal_point = self.get_decimal_point)
-        self.coinshuffle_changes = ChangeAdressWidget()
-        self.coinshuffle_outputs = OutputAdressWidget()
-        self.coinshuffle_amount_radio = AmountSelect(self.coinshuffle_amounts, decimal_point = self.get_decimal_point)
-        self.coinshuffle_fee = QLabel(_(self.format_amount_and_units(self.coinshuffle_fee_constant)))
-        # self.coinshuffle_amount = BTCAmountEdit(self.get_decimal_point)
-        # self.coinshuffle_fee = BTCAmountEdit(self.get_decimal_point)
-        # self.coinshuffle_limit = 1e5 # limit in satosis
-        # self.coinshuffle_max_button = EnterButton(_("Max"), lambda: self.coinshuffle_amount.setAmount(self.coinshuffle_limit))
-        # self.coinshuffle_max_button.setFixedWidth(140)
-        self.coinshuffle_text_output = ConsoleOutput()
-
-
-        # self.coinshuffle_amount.textChanged.connect(self.check_sufficient_ammount)
-        self.coinshuffle_inputs.currentIndexChanged.connect(self.check_sufficient_ammount)
-        self.coinshuffle_amount_radio.button_group.buttonClicked.connect(self.check_sufficient_ammount)
-        # self.coinshuffle_fee.textChanged.connect(self.check_sufficient_ammount)
-
-        # def fee_cb(dyn, pos, fee_rate):
-        #     if dyn:
-        #         self.config.set_key('fee_level', pos, False)
-        #     else:
-        #         self.config.set_key('fee_per_kb', fee_rate, False)
-        #     self.spend_max() if self.is_max else self.update_fee()
-        #
-        # self.coinshuffle_fee_slider = FeeSlider(self, self.config, fee_cb)
-        # self.coinshuffle_fee_slider.setFixedWidth(140)
-        # self.coinshuffle_start_button = EnterButton(_("Shuffle"),lambda: QMessageBox.information(None,"1","2"))
-        # self.coinshuffle_start_button = EnterButton(_("Shuffle"), lambda: self.start_coinshuffle_protocol(self.coinshuffle_inputs.get_input_address(), self.coinshuffle_changes.get_change_address(), self.coinshuffle_amount.get_amount(), self.coinshuffle_fee.get_amount(), logger = self.coinshuffle_text_output))
-        self.coinshuffle_start_button = EnterButton(_("Shuffle"),lambda: self.start_coinshuffle_protocol())
-        self.coinshuffle_start_button.setEnabled(False)
-        # start_protocol(self.wallet, self.network, self.coinshuffle_inputs.get_input_address, )
-        # self.coinshufle_input_addrs = []
-        # self.coinshuffle_inputs.addItems()
-
-        grid.addWidget(QLabel(_('Shuffle input address')), 1, 0)
-        grid.addWidget(QLabel(_('Shuffle change address')), 2, 0)
-        grid.addWidget(QLabel(_('Shuffle output address')), 3, 0)
-        grid.addWidget(QLabel(_('Amount')), 4, 0)
-        grid.addWidget(QLabel(_('Fee')), 5, 0)
-        grid.addWidget(self.coinshuffle_inputs,1,1,1,-1)
-        grid.addWidget(self.coinshuffle_changes,2,1,1,-1)
-        grid.addWidget(self.coinshuffle_outputs,3,1,1,-1)
-        grid.addWidget(self.coinshuffle_amount_radio,4,1)
-        # grid.addWidget(self.coinshuffle_amount,3,1)
-        # grid.addWidget(self.coinshuffle_max_button, 3, 2)
-        # grid.addWidget(self.coinshuffle_fee_slider, 4, 1)
-        grid.addWidget(self.coinshuffle_fee ,5, 1)
-        # grid.addWidget(self.coinshuffle_fee,5, 1)
-        grid.addWidget(self.coinshuffle_start_button, 6, 0)
-        grid.addWidget(self.coinshuffle_text_output,7,0,1,-1)
-
-        vbox0 = QVBoxLayout()
-        vbox0.addLayout(grid)
-        hbox = QHBoxLayout()
-        hbox.addLayout(vbox0)
-        w = QWidget()
-        vbox = QVBoxLayout(w)
-        vbox.addLayout(hbox)
-        vbox.addStretch(1)
-        # run_hook('create_send_tab', grid)
-        # self.shuffle_list = l = ShuffleList(self)
-        # return self.create_list_tab(l)
-        return w
 
     def create_contacts_tab(self):
         from contact_list import ContactList
@@ -2051,7 +1867,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def do_verify(self, address, message, signature):
         address  = str(address.text()).strip()
-        message = unicode(message.toPlainText()).strip().encode('utf-8').strip()
+        message = unicode(message.toPlainText()).encode('utf-8').strip()
         if not bitcoin.is_address(address):
             self.show_message('Invalid Bitcoin Cash address.')
             return
@@ -2115,7 +1931,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.wallet.thread.add(task, on_success=message_e.setText)
 
     def do_encrypt(self, message_e, pubkey_e, encrypted_e):
-        message = unicode(message_e.toPlainText())
+        message = message_e.toPlainText()
         message = message.encode('utf-8')
         try:
             encrypted = bitcoin.encrypt_message(message, str(pubkey_e.text()))
@@ -2391,7 +2207,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             return
         try:
             self.do_export_history(self.wallet, filename, csv_button.isChecked())
-        except (IOError, os.error), reason:
+        except (IOError, os.error) as reason:
             export_error_label = _("Electron Cash was unable to produce a transaction export.")
             self.show_critical(export_error_label + "\n" + str(reason), title=_("Unable to export history"))
             return
@@ -2627,7 +2443,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             if alias:
                 self.fetch_alias()
         set_alias_color()
-        self.disconnect(self, SIGNAL('alias_received'), set_alias_color)
+        self.connect(self, SIGNAL('alias_received'), set_alias_color)
         alias_e.editingFinished.connect(on_alias_edit)
         id_widgets.append((alias_label, alias_e))
 
@@ -2683,11 +2499,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             for edit, amount in zip(edits, amounts):
                 edit.setAmount(amount)
             self.update_status()
-            #
-            self.coinshuffle_inputs.update(self.wallet)
-            self.coinshuffle_amount_radio.update()
-            self.coinshuffle_fee.setText(self.format_amount_and_units(self.coinshuffle_fee_constant)) 
-
         unit_combo.currentIndexChanged.connect(on_unit)
         gui_widgets.append((unit_label, unit_combo))
 
@@ -3019,3 +2830,4 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
             return
         new_tx = self.wallet.cpfp(parent_tx, fee)
         self.show_transaction(new_tx)
+
