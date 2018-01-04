@@ -50,7 +50,7 @@ from electroncash.util import (format_time, format_satoshis, PrintError,
                            UserCancelled)
 import electroncash.web as web
 from electroncash import Transaction
-from electroncash import util, bitcoin, commands, coinchooser
+from electroncash import util, bitcoin, commands
 from electroncash import paymentrequest
 from electroncash.wallet import Multisig_Wallet, sweep_preparations
 try:
@@ -149,18 +149,18 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         tabs.addTab(self.send_tab, QIcon(":icons/tab_send.png"), _('Send'))
         tabs.addTab(self.receive_tab, QIcon(":icons/tab_receive.png"), _('Receive'))
 
-        def add_optional_tab(tabs, tab, icon, description, name):
+        def add_optional_tab(tabs, tab, icon, description, name, default=False):
             tab.tab_icon = icon
             tab.tab_description = description
             tab.tab_pos = len(tabs)
             tab.tab_name = name
-            if self.config.get('show_{}_tab'.format(name), False):
+            if self.config.get('show_{}_tab'.format(name), default):
                 tabs.addTab(tab, icon, description.replace("&", ""))
 
         add_optional_tab(tabs, self.addresses_tab, QIcon(":icons/tab_addresses.png"), _("&Addresses"), "addresses")
         add_optional_tab(tabs, self.utxo_tab, QIcon(":icons/tab_coins.png"), _("Co&ins"), "utxo")
         add_optional_tab(tabs, self.contacts_tab, QIcon(":icons/tab_contacts.png"), _("Con&tacts"), "contacts")
-        add_optional_tab(tabs, self.converter_tab, QIcon(":icons/tab_converter.png"), _("Address Converter"), "converter")
+        add_optional_tab(tabs, self.converter_tab, QIcon(":icons/tab_converter.png"), _("Address Converter"), "converter", True)
         add_optional_tab(tabs, self.console_tab, QIcon(":icons/tab_console.png"), _("Con&sole"), "console")
 
         tabs.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -637,7 +637,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
 
     def format_fee_rate(self, fee_rate):
         if self.fee_unit == 0:
-            return format_satoshis(fee_rate/1000, False, self.num_zeros, 0, False)  + ' sat/byte'
+            return '{:.2f} sats/byte'.format(fee_rate/1000)
         else:
             return self.format_amount(fee_rate) + ' ' + self.base_unit() + '/kB'
 
@@ -970,10 +970,10 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         self.update_receive_address_widget()
 
     def update_receive_address_widget(self):
+        text = ''
         if self.receive_address:
-            self.receive_address_e.setText(self.receive_address.to_ui_string())
-        else:
-            self.receive_address_e.setText('')
+            text = self.receive_address.to_full_ui_string()
+        self.receive_address_e.setText(text)
 
     def clear_receive_tab(self):
         self.expires_label.hide()
@@ -1014,7 +1014,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         uri = web.create_URI(self.receive_address, amount, message)
         self.receive_qr.setData(uri)
         if self.qr_window and self.qr_window.isVisible():
-            self.qr_window.set_content(self.receive_address, amount,
+            self.qr_window.set_content(self.receive_address_e.text(), amount,
                                        message, uri)
 
     def create_send_tab(self):
@@ -1576,7 +1576,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
                 addr = None
             for widget, fmt in widgets:
                 if addr:
-                    widget.setText(addr.to_string(fmt))
+                    widget.setText(addr.to_full_string(fmt))
                 else:
                     widget.setText('')
 
@@ -2752,21 +2752,6 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, PrintError):
         def fmt_docs(key, klass):
             lines = [ln.lstrip(" ") for ln in klass.__doc__.split("\n")]
             return '\n'.join([key, "", " ".join(lines)])
-
-        choosers = sorted(coinchooser.COIN_CHOOSERS.keys())
-        chooser_name = coinchooser.get_name(self.config)
-        msg = _('Choose coin (UTXO) selection method.  The following are available:\n\n')
-        msg += '\n\n'.join(fmt_docs(*item) for item in coinchooser.COIN_CHOOSERS.items())
-        chooser_label = HelpLabel(_('Coin selection') + ':', msg)
-        chooser_combo = QComboBox()
-        chooser_combo.addItems(choosers)
-        i = choosers.index(chooser_name) if chooser_name in choosers else 0
-        chooser_combo.setCurrentIndex(i)
-        def on_chooser(x):
-            chooser_name = choosers[chooser_combo.currentIndex()]
-            self.config.set_key('coin_chooser', chooser_name)
-        chooser_combo.currentIndexChanged.connect(on_chooser)
-        tx_widgets.append((chooser_label, chooser_combo))
 
         def on_unconf(x):
             self.config.set_key('confirmed_only', bool(x))
