@@ -134,14 +134,14 @@ class BitcoinVenezuela(ExchangeBase):
 class Bitmarket(ExchangeBase):
 
     def get_rates(self, ccy):
-        json = self.get_json('www.bitmarket.pl', '/json/BTCPLN/ticker.json')
+        json = self.get_json('www.bitmarket.pl', '/json/BCCPLN/ticker.json')
         return {'PLN': Decimal(json['last'])}
 
 
 class BitPay(ExchangeBase):
 
     def get_rates(self, ccy):
-        json = self.get_json('bitpay.com', '/api/rates')
+        json = self.get_json('bitpay.com', '/api/rates/BCH')
         return dict([(r['code'], Decimal(r['rate'])) for r in json])
 
 
