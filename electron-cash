@@ -24,7 +24,15 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 import os
+#uncomment this line when running on linux to debug kivy.
+#Should have 3D acceleration turn on, on VM.  Also guest additions CD image.
+#os.environ['KIVY_GL_BACKEND']='sdl2'
+
+
 import sys
+
+if not (sys.version_info[0] >= 3 and sys.version_info[1] >= 5):
+    raise BaseException("Must be using Python 3.5 or higher")
 
 # from https://gist.github.com/tito/09c42fb4767721dc323d
 import threading
